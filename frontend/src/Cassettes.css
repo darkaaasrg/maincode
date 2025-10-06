@@ -1,29 +1,49 @@
-.container {
+.catalog-section {
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
 }
 
-.cards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
+.product-card img {
+  max-width: 200px;
+  display: block;
+  margin: 10px 0;
 }
 
-.card {
+.review-item {
   border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px;
-  width: 200px;
-  text-align: center;
+  padding: 5px;
+  margin-bottom: 5px;
 }
 
-.card img {
+.review-form input {
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+/* Модальне вікно */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: auto;
-  border-radius: 5px;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
-h2 {
-  text-align: center;
-  
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  max-width: 400px;
+  width: 90%;
+  border-radius: 8px;
+}
+
+.modal-buttons button {
+  margin-right: 5px;
+  margin-top: 10px;
 }
