@@ -30,7 +30,9 @@ db.connect(err => {
   }
 });
 
-// 🔹 Всі касети
+/* ==================== КАСЕТИ ==================== */
+
+// Отримати всі касети
 app.get("/api/cassettes", (req, res) => {
   db.query("SELECT * FROM Cassettes", (err, results) => {
     if (err) return res.status(500).json(err);
@@ -38,7 +40,53 @@ app.get("/api/cassettes", (req, res) => {
   });
 });
 
-// 🔹 Всі вініли
+// Отримати касету за ID
+app.get("/api/cassettes/:id", (req, res) => {
+  const id = req.params.id;
+  db.query("SELECT * FROM Cassettes WHERE ID = ?", [id], (err, results) => {
+    if (err) return res.status(500).json(err);
+    res.json(results[0] || null);
+  });
+});
+
+// Додати касету
+app.post("/api/cassettes", (req, res) => {
+  const { Title, Artist, Genre, Published, Price, Country, Photo } = req.body;
+  const sql = `
+    INSERT INTO Cassettes (Title, Artist, Genre, Published, Price, Country, Photo)
+    VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  db.query(sql, [Title, Artist, Genre, Published, Price, Country, Photo], (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ ID: result.insertId, message: "Касету додано" });
+  });
+});
+
+// Редагувати касету
+app.put("/api/cassettes/:id", (req, res) => {
+  const id = req.params.id;
+  const { Title, Artist, Genre, Published, Price, Country, Photo } = req.body;
+  const sql = `
+    UPDATE Cassettes
+    SET Title = ?, Artist = ?, Genre = ?, Published = ?, Price = ?, Country = ?, Photo = ?
+    WHERE ID = ?`;
+  db.query(sql, [Title, Artist, Genre, Published, Price, Country, Photo, id], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: "Касету оновлено" });
+  });
+});
+
+// Видалити касету
+app.delete("/api/cassettes/:id", (req, res) => {
+  const id = req.params.id;
+  db.query("DELETE FROM Cassettes WHERE ID = ?", [id], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: "Касету видалено" });
+  });
+});
+
+/* ==================== ВІНІЛИ ==================== */
+
+// Отримати всі вінілові диски
 app.get("/api/vinyls", (req, res) => {
   db.query("SELECT * FROM Vinyls", (err, results) => {
     if (err) return res.status(500).json(err);
@@ -46,9 +94,53 @@ app.get("/api/vinyls", (req, res) => {
   });
 });
 
+// Отримати вініл за ID
+app.get("/api/vinyls/:id", (req, res) => {
+  const id = req.params.id;
+  db.query("SELECT * FROM Vinyls WHERE ID = ?", [id], (err, results) => {
+    if (err) return res.status(500).json(err);
+    res.json(results[0] || null);
+  });
+});
+
+// Додати вініл
+app.post("/api/vinyls", (req, res) => {
+  const { Title, Artist, Genre, Published, Price, Country, Photo } = req.body;
+  const sql = `
+    INSERT INTO Vinyls (Title, Artist, Genre, Published, Price, Country, Photo)
+    VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  db.query(sql, [Title, Artist, Genre, Published, Price, Country, Photo], (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ ID: result.insertId, message: "Вініл додано" });
+  });
+});
+
+// Редагувати вініл
+app.put("/api/vinyls/:id", (req, res) => {
+  const id = req.params.id;
+  const { Title, Artist, Genre, Published, Price, Country, Photo } = req.body;
+  const sql = `
+    UPDATE Vinyls
+    SET Title = ?, Artist = ?, Genre = ?, Published = ?, Price = ?, Country = ?, Photo = ?
+    WHERE ID = ?`;
+  db.query(sql, [Title, Artist, Genre, Published, Price, Country, Photo, id], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: "Вініл оновлено" });
+  });
+});
+
+// Видалити вініл
+app.delete("/api/vinyls/:id", (req, res) => {
+  const id = req.params.id;
+  db.query("DELETE FROM Vinyls WHERE ID = ?", [id], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: "Вініл видалено" });
+  });
+});
+
 /* ==================== ВІДГУКИ ==================== */
 
-// 🔹 Отримати відгуки для конкретної касети
+// Отримати відгуки касети
 app.get("/api/cassettes/:id/reviews", (req, res) => {
   const cassetteId = req.params.id;
   db.query(
@@ -61,16 +153,17 @@ app.get("/api/cassettes/:id/reviews", (req, res) => {
   );
 });
 
-// 🔹 Додати відгук для касети
+// Додати відгук касети
 app.post("/api/cassettes/:id/reviews", (req, res) => {
   const cassetteId = req.params.id;
   const { userId, rating, comment } = req.body;
 
-  const sql = "INSERT INTO ReviewsCassettes (cassette_id, userId, rating, comment) VALUES (?, ?, ?, ?)";
+  const sql = `
+    INSERT INTO ReviewsCassettes (cassette_id, userId, rating, comment, date)
+    VALUES (?, ?, ?, ?, NOW())`;
   db.query(sql, [cassetteId, userId, rating, comment], (err) => {
     if (err) return res.status(500).json(err);
 
-    // Повертаємо оновлений список відгуків
     db.query(
       "SELECT * FROM ReviewsCassettes WHERE cassette_id = ? ORDER BY date DESC",
       [cassetteId],
@@ -82,44 +175,12 @@ app.post("/api/cassettes/:id/reviews", (req, res) => {
   });
 });
 
-// 🔹 Отримати відгуки для конкретного вінiлу
-app.get("/api/vinyls/:id/reviews", (req, res) => {
-  const vinylId = req.params.id;
-  db.query(
-    "SELECT * FROM ReviewsVinyls WHERE vinyl_id = ? ORDER BY date DESC",
-    [vinylId],
-    (err, results) => {
-      if (err) return res.status(500).json(err);
-      res.json(results);
-    }
-  );
-});
-
-// 🔹 Додати відгук для вінiлу
-app.post("/api/vinyls/:id/reviews", (req, res) => {
-  const vinylId = req.params.id;
-  const { userId, rating, comment } = req.body;
-
-  const sql = "INSERT INTO ReviewsVinyls (vinyl_id, userId, rating, comment) VALUES (?, ?, ?, ?)";
-  db.query(sql, [vinylId, userId, rating, comment], (err) => {
-    if (err) return res.status(500).json(err);
-
-    db.query(
-      "SELECT * FROM ReviewsVinyls WHERE vinyl_id = ? ORDER BY date DESC",
-      [vinylId],
-      (err2, results) => {
-        if (err2) return res.status(500).json(err2);
-        res.json(results);
-      }
-    );
-  });
-});
-
+// Редагувати відгук
 app.put("/api/reviews/:id", (req, res) => {
   const reviewId = req.params.id;
   const { rating, comment } = req.body;
   db.query(
-    "UPDATE Reviews SET rating = ?, comment = ? WHERE ID = ?",
+    "UPDATE ReviewsCassettes SET rating = ?, comment = ? WHERE ID = ?",
     [rating, comment, reviewId],
     (err) => {
       if (err) return res.status(500).json(err);
@@ -131,12 +192,11 @@ app.put("/api/reviews/:id", (req, res) => {
 // Видалити відгук
 app.delete("/api/reviews/:id", (req, res) => {
   const reviewId = req.params.id;
-  db.query("DELETE FROM Reviews WHERE ID = ?", [reviewId], (err) => {
+  db.query("DELETE FROM ReviewsCassettes WHERE ID = ?", [reviewId], (err) => {
     if (err) return res.status(500).json(err);
     res.json({ message: "Відгук видалено" });
   });
 });
-
 
 app.get("/", (req, res) => {
   res.send("API працює! Використовуй /vinyls або /cassettes");
