@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-// Припустімо, що у вас є файл стилів, якщо ви його використовуєте
-// import "./Vinyls.css"; 
+import "./Vinyls.css";
 
 export default function Vinyls() {
   const [vinylList, setVinylList] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [selectedVinyl, setSelectedVinyl] = useState(null);
-  
-  // 🔹 CRUD для вінілів (використовуємо formData та isModalOpen, як у вашому Vinyls.jsx)
+
+  // 🔹 Для форми вінілу
   const [formData, setFormData] = useState({
     Title: "",
     Artist: "",
@@ -19,18 +18,19 @@ export default function Vinyls() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 🔹 CRUD для відгуків (НОВЕ)
+  // 🔹 Для відгуків
   const [userId, setUserId] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [reviews, setReviews] = useState([]);
 
-  const [reviewModalOpen, setReviewModalOpen] = useState(false); // Для модалки відгуків
+  // 🔹 Модалка для редагування / видалення відгуків
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [currentReview, setCurrentReview] = useState(null);
   const [modalRating, setModalRating] = useState(5);
   const [modalComment, setModalComment] = useState("");
 
-  // 🔹 Завантаження вінілів
+  // --- Завантаження вінілів ---
   const loadVinyls = () => {
     fetch("http://localhost:5000/api/vinyls")
       .then((res) => res.json())
@@ -42,7 +42,7 @@ export default function Vinyls() {
     loadVinyls();
   }, []);
 
-  // 🔹 Завантаження відгуків (НОВЕ)
+  // --- Завантаження відгуків ---
   const loadReviews = (id) => {
     fetch(`http://localhost:5000/api/vinyls/${id}/reviews`)
       .then((res) => res.json())
@@ -50,21 +50,18 @@ export default function Vinyls() {
       .catch((err) => console.error(err));
   };
 
-  // 🔹 Вибір вінілу
+  // --- Вибір вінілу ---
   const handleSelectChange = (e) => {
     const id = e.target.value;
     setSelectedId(id);
     const found = vinylList.find((v) => v.ID.toString() === id);
     setSelectedVinyl(found);
 
-    if (found) {
-        loadReviews(id); // Завантажуємо відгуки для вибраного вінілу
-    } else {
-        setReviews([]);
-    }
+    if (found) loadReviews(id);
+    else setReviews([]);
   };
 
-  // 🔹 Відкриття модалки для створення / редагування вінілу
+  // --- Модалка для вінілу ---
   const handleOpenModal = (vinyl = null) => {
     if (vinyl) {
       setFormData({
@@ -79,30 +76,37 @@ export default function Vinyls() {
       setSelectedId(vinyl.ID);
     } else {
       setFormData({
-        Title: "", Artist: "", Genre: "", Country: "",
-        Published: "", Price: "", Photo: "",
+        Title: "",
+        Artist: "",
+        Genre: "",
+        Country: "",
+        Published: "",
+        Price: "",
+        Photo: "",
       });
       setSelectedId("");
     }
     setIsModalOpen(true);
   };
 
-  // 🔹 Закриття модалки вінілу
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setFormData({
-      Title: "", Artist: "", Genre: "", Country: "",
-      Published: "", Price: "", Photo: "",
+      Title: "",
+      Artist: "",
+      Genre: "",
+      Country: "",
+      Published: "",
+      Price: "",
+      Photo: "",
     });
   };
 
-  // 🔹 Обробка введення для форми вінілу
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🔹 Додавання або оновлення вінілу
   const handleSave = async () => {
     try {
       const method = selectedId ? "PUT" : "POST";
@@ -124,7 +128,7 @@ export default function Vinyls() {
         setVinylList((prev) =>
           prev.map((v) => (v.ID === updated.ID ? updated : v))
         );
-        setSelectedVinyl(updated); 
+        setSelectedVinyl(updated);
       } else {
         setVinylList((prev) => [...prev, updated]);
       }
@@ -136,7 +140,6 @@ export default function Vinyls() {
     }
   };
 
-  // 🔹 Видалення вінілу
   const handleDelete = async (id) => {
     if (!window.confirm("Видалити цей вініл?")) return;
     try {
@@ -147,16 +150,14 @@ export default function Vinyls() {
       setVinylList((prev) => prev.filter((v) => v.ID !== id));
       setSelectedVinyl(null);
       setSelectedId("");
-      setReviews([]); // Скидаємо відгуки
+      setReviews([]);
     } catch (err) {
       console.error(err);
       alert("Не вдалося видалити вініл");
     }
   };
 
-  // --- ЛОГІКА ВІДГУКІВ (НОВЕ) ---
-
-  // 🔹 Додавання відгуку
+  // --- Відгуки ---
   const handleAddReview = async (e) => {
     e.preventDefault();
     if (!selectedVinyl) return alert("Оберіть вініл!");
@@ -171,7 +172,7 @@ export default function Vinyls() {
           body: JSON.stringify({ userId, rating, comment }),
         }
       );
-      const updatedReviews = await res.json(); 
+      const updatedReviews = await res.json();
       setReviews(updatedReviews);
       setUserId("");
       setComment("");
@@ -182,7 +183,7 @@ export default function Vinyls() {
     }
   };
 
-  // 🔹 Модалка для редагування відгуків: Відкриття
+  // --- Модалка для редагування / видалення відгуків ---
   const openReviewModal = (review) => {
     setCurrentReview(review);
     setModalRating(review.rating);
@@ -190,15 +191,16 @@ export default function Vinyls() {
     setReviewModalOpen(true);
   };
 
-  // 🔹 Модалка для редагування відгуків: Збереження
   const saveReviewModal = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/reviews/${currentReview.ID}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating: modalRating, comment: modalComment }),
-      });
-      
+      const res = await fetch(
+        `http://localhost:5000/api/reviews/${currentReview.ID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rating: modalRating, comment: modalComment }),
+        }
+      );
       if (!res.ok) throw new Error("Помилка при оновленні відгуку");
 
       setReviews(
@@ -216,14 +218,13 @@ export default function Vinyls() {
     }
   };
 
-  // 🔹 Модалка для редагування відгуків: Видалення
   const deleteReviewModal = async () => {
     if (!window.confirm("Видалити відгук?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/reviews/${currentReview.ID}`, {
-        method: "DELETE",
-      });
-      
+      const res = await fetch(
+        `http://localhost:5000/api/reviews/${currentReview.ID}`,
+        { method: "DELETE" }
+      );
       if (!res.ok) throw new Error("Помилка при видаленні відгуку");
 
       setReviews(reviews.filter((r) => r.ID !== currentReview.ID));
@@ -237,11 +238,15 @@ export default function Vinyls() {
 
   return (
     <div className="catalog-section">
-      <h2>Вініли 🎶</h2>
+      <h2>Вініли</h2>
 
-      <button onClick={() => handleOpenModal()}>➕ Додати вініл</button>
+      <button className="add-vinyl-btn" onClick={() => handleOpenModal()}>Додати вініл</button>
 
-      <select value={selectedId} onChange={handleSelectChange} className="select-item">
+      <select
+        value={selectedId}
+        onChange={handleSelectChange}
+        className="select-item"
+      >
         <option value="">-- Оберіть вініл --</option>
         {vinylList.map((v) => (
           <option key={v.ID} value={v.ID}>
@@ -266,15 +271,20 @@ export default function Vinyls() {
           )}
 
           <div className="vinyl-buttons">
-            <button onClick={() => handleOpenModal(selectedVinyl)}>✏️ Редагувати</button>
-            <button onClick={() => handleDelete(selectedVinyl.ID)}>🗑️ Видалити</button>
+            <button onClick={() => handleOpenModal(selectedVinyl)}>Редагувати</button>
+            <button
+              className="delete-btn"
+              onClick={() => handleDelete(selectedVinyl.ID)}
+            >
+              Видалити
+            </button>
           </div>
-          
-          {/* ФОРМА ДОДАВАННЯ ВІДГУКУ (НОВЕ) */}
+
+          {/* Додати відгук */}
           <form onSubmit={handleAddReview} className="review-form">
             <h4>Додати відгук:</h4>
             <input
-              placeholder="Ваш ID"
+              placeholder="Ім'я користувача"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
             />
@@ -293,7 +303,7 @@ export default function Vinyls() {
             <button type="submit">Додати відгук</button>
           </form>
 
-          {/* СПИСОК ВІДГУКІВ (НОВЕ) */}
+          {/* Відгуки */}
           <div className="reviews">
             <h4>Відгуки:</h4>
             {reviews.length === 0 ? (
@@ -301,12 +311,18 @@ export default function Vinyls() {
             ) : (
               reviews.map((r) => (
                 <div key={r.ID} className="review-item">
-                  <b>{r.userId}</b>: {r.rating}★ — {r.comment}
+                  <b className="v">{r.userId}</b>: {r.rating}★ — {r.comment}
                   <br />
-                  <small>{new Date(r.date).toLocaleString()}</small>
-                  <button onClick={() => openReviewModal(r)}>
-                    Редагувати / Видалити
-                  </button>
+                  <small className="v" >{new Date(r.date).toLocaleString()}</small>
+                  <div className="review-buttons">
+                    <button onClick={() => openReviewModal(r)}>Редагувати</button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => openReviewModal(r)}
+                    >
+                      Видалити
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -314,7 +330,7 @@ export default function Vinyls() {
         </div>
       )}
 
-      {/* 🔹 Модалка вінілу */}
+      {/* Модалка вініл */}
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
@@ -363,14 +379,14 @@ export default function Vinyls() {
             />
 
             <div className="modal-actions">
-              <button onClick={handleSave}>💾 Зберегти</button>
-              <button onClick={handleCloseModal}>❌ Закрити</button>
+              <button className="save-btn" onClick={handleSave}>Зберегти</button>
+              <button className="close-btn" onClick={handleCloseModal}>Закрити</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 🔹 Модальне вікно відгуків (НОВЕ) */}
+      {/* Модалка відгуків */}
       {reviewModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -387,7 +403,7 @@ export default function Vinyls() {
               onChange={(e) => setModalComment(e.target.value)}
             />
             <div className="modal-buttons">
-              <button onClick={saveReviewModal}>Зберегти</button>
+              <button  onClick={saveReviewModal}>Зберегти</button>
               <button onClick={deleteReviewModal}>Видалити</button>
               <button onClick={() => setReviewModalOpen(false)}>Відмінити</button>
             </div>
