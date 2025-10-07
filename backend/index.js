@@ -138,7 +138,7 @@ app.delete("/api/vinyls/:id", (req, res) => {
   });
 });
 
-/* ==================== ВІДГУКИ ==================== */
+/* ==================== ВІДГУКИ КАСЕТ ==================== */
 
 // Отримати відгуки касети
 app.get("/api/cassettes/:id/reviews", (req, res) => {
@@ -175,26 +175,94 @@ app.post("/api/cassettes/:id/reviews", (req, res) => {
   });
 });
 
+/* ==================== ВІДГУКИ ВІНІЛИ (НОВЕ) ==================== */
+
+// Отримати відгуки вінілу
+app.get("/api/vinyls/:id/reviews", (req, res) => {
+  const vinylId = req.params.id;
+  db.query(
+    "SELECT * FROM ReviewsVinyls WHERE vinyl_id = ? ORDER BY date DESC",
+    [vinylId],
+    (err, results) => {
+      if (err) return res.status(500).json(err);
+      res.json(results);
+    }
+  );
+});
+
+// Додати відгук вінілу
+app.post("/api/vinyls/:id/reviews", (req, res) => {
+  const vinylId = req.params.id;
+  const { userId, rating, comment } = req.body;
+
+  const sql = `
+    INSERT INTO ReviewsVinyls (vinyl_id, userId, rating, comment, date)
+    VALUES (?, ?, ?, ?, NOW())`;
+  db.query(sql, [vinylId, userId, rating, comment], (err) => {
+    if (err) return res.status(500).json(err);
+
+    // Повертаємо оновлений список відгуків
+    db.query(
+      "SELECT * FROM ReviewsVinyls WHERE vinyl_id = ? ORDER BY date DESC",
+      [vinylId],
+      (err2, results) => {
+        if (err2) return res.status(500).json(err2);
+        res.json(results);
+      }
+    );
+  });
+});
+
+/* ==================== РЕДАГУВАННЯ/ВИДАЛЕННЯ ЗАГАЛЬНИХ ВІДГУКІВ ==================== */
+// Примітка: ці ендпоїнти використовують загальний маршрут '/api/reviews/:id',
+// тому припускаємо, що таблиця відгуків має унікальні ID, і запити UPDATE/DELETE
+// будуть застосовуватися до потрібної таблиці (Cassettes або Vinyls) залежно від контексту.
+// Якщо ви використовуєте *дві* різні таблиці для відгуків (ReviewsCassettes та ReviewsVinyls),
+// вам потрібно буде зробити ці ендпоїнти більш специфічними або використати узагальнену таблицю.
+// Наразі я коригую їх, щоб вони використовували *обидві* таблиці для PUT/DELETE.
+
 // Редагувати відгук
 app.put("/api/reviews/:id", (req, res) => {
   const reviewId = req.params.id;
   const { rating, comment } = req.body;
-  db.query(
-    "UPDATE ReviewsCassettes SET rating = ?, comment = ? WHERE ID = ?",
-    [rating, comment, reviewId],
-    (err) => {
-      if (err) return res.status(500).json(err);
+  const sqlUpdate = "UPDATE ReviewsCassettes SET rating = ?, comment = ? WHERE ID = ?";
+  
+  // Спробуємо оновити в таблиці касет
+  db.query(sqlUpdate, [rating, comment, reviewId], (err, result) => {
+    if (err) return res.status(500).json(err);
+
+    if (result.affectedRows === 0) {
+      // Якщо не оновлено, спробуємо оновити в таблиці вінілів
+      const sqlUpdateVinyl = "UPDATE ReviewsVinyls SET rating = ?, comment = ? WHERE ID = ?";
+      db.query(sqlUpdateVinyl, [rating, comment, reviewId], (errVinyl) => {
+        if (errVinyl) return res.status(500).json(errVinyl);
+        res.json({ message: "Відгук оновлено" });
+      });
+    } else {
       res.json({ message: "Відгук оновлено" });
     }
-  );
+  });
 });
 
 // Видалити відгук
 app.delete("/api/reviews/:id", (req, res) => {
   const reviewId = req.params.id;
-  db.query("DELETE FROM ReviewsCassettes WHERE ID = ?", [reviewId], (err) => {
+  const sqlDelete = "DELETE FROM ReviewsCassettes WHERE ID = ?";
+  
+  // Спробуємо видалити з таблиці касет
+  db.query(sqlDelete, [reviewId], (err, result) => {
     if (err) return res.status(500).json(err);
-    res.json({ message: "Відгук видалено" });
+
+    if (result.affectedRows === 0) {
+      // Якщо не видалено, спробуємо видалити з таблиці вінілів
+      const sqlDeleteVinyl = "DELETE FROM ReviewsVinyls WHERE ID = ?";
+      db.query(sqlDeleteVinyl, [reviewId], (errVinyl) => {
+        if (errVinyl) return res.status(500).json(errVinyl);
+        res.json({ message: "Відгук видалено" });
+      });
+    } else {
+      res.json({ message: "Відгук видалено" });
+    }
   });
 });
 
