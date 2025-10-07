@@ -1,25 +1,273 @@
-.container {
-  padding: 20px;
-}
-
-.cards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  background-color: white;
-}
-
-.card {
-  border: 1px solid #ccc;
-  border-radius: 8px;
+/* Загальний контейнер */
+.catalog-section {
+  max-width: 900px;
+  margin: 20px auto;
   padding: 10px;
-  width: 200px;
-  text-align: center;
+  font-family: Arial, sans-serif;
 }
 
-.card img {
+/* Список вінілів */
+.select-item {
   width: 100%;
-  height: auto;
+  padding: 8px;
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+/* Картка вінiлу */
+.product-card {
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.product-card img {
+  max-width: 200px;
+  margin-top: 10px;
+  display: block;
+}
+
+/* Кнопки для вінiлу */
+.vinyl-buttons {
+  margin-top: 10px;
+}
+
+.vinyl-buttons button {
+  padding: 6px 12px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.vinyl-buttons button:hover {
+  opacity: 0.9;
+}
+
+.vinyl-buttons .delete-btn {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.vinyl-buttons button:not(.delete-btn) {
+  background-color: #3498db;
+  color: #fff;
+}
+
+/* Форма відгуків */
+.review-form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.review-form input {
+  padding: 6px 8px;
+  font-size: 14px;
+}
+
+.review-form button {
+  width: 150px;
+  padding: 6px;
+  border: none;
+  border-radius: 4px;
+  background-color: #3498db;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Відгуки */
+.reviews {
+  margin-top: 20px;
+}
+
+.review-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #ddd;
+ 
+}
+
+.review-buttons {
+  margin-top: 5px;
+  padding-left: 10px;
+}
+
+.review-buttons button {
+  padding: 4px 8px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.review-buttons button:hover {
+  opacity: 0.9;
+}
+
+.review-buttons .delete-btn {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.review-buttons button:not(.delete-btn) {
+  background-color: #3498db;
+  color: #fff;
+}
+
+/* Модалка (вінiл та відгуки) */
+.modal,
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Вміст модалки */
+.modal-content {
+  background-color: #fff;
+  padding: 20px 25px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Поля вводу всередині модалки */
+.modal-content input,
+.modal-content textarea {
+  padding: 6px 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
   border-radius: 5px;
+  width: 90%;
+}
+
+.modal-overlay .modal-content {
+  width: 390px;
+  height: 250px; /* фіксований розмір */
+  overflow-y: auto;
+}
+
+/* Кнопки всередині модалки */
+.modal-actions,
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.modal-actions button,
+.modal-buttons button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  
+}
+
+.modal-actions button:first-child,
+.modal-buttons button:first-child {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.modal-actions button.delete-btn,
+.modal-buttons button.delete-btn {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.modal-actions button:last-child,
+.modal-buttons button:last-child {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.modal-content textarea {
+  resize: none;
+  height: 80px;
+  width: 350px;
+}
+
+
+.v {
+  padding-left: 10px;
+}
+
+button.add-vinyl-btn {
+  background-color: #4CAF50; 
+  color: white; 
+  padding: 10px 20px; 
+  border: none; 
+  border-radius: 5px;
+  cursor: pointer; 
+  font-size: 16px; 
+  transition: background-color 0.3s ease; 
+}
+
+button.add-vinyl-btn:hover {
+  background-color: #45a049; 
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px; 
+  margin-top: 15px; 
+}
+
+.modal-actions button {
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-actions .close-btn {
+  background-color: #e74c3c; 
+  color: white;
+}
+
+.modal-actions .save-btn {
+  background-color: #4CAF50; 
+  color: white;
+}
+
+.modal-content h3 {
+  text-align: center; 
+  margin-bottom: 15px; 
+  font-size: 20px; 
+  font-weight: bold; 
+}
+
+button.add-vinyl-btn {
+  background-color: #4CAF50; 
+  color: white; 
+  padding: 10px 20px; 
+  border: none; 
+  border-radius: 5px;
+  cursor: pointer; 
+  font-size: 16px; 
+  transition: background-color 0.3s ease; 
+}
+
+button.add-vinyl-btn:hover {
+  background-color: #45a049; 
 }

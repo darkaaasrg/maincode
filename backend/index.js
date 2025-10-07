@@ -244,7 +244,6 @@ app.put("/api/reviews/:id", (req, res) => {
   });
 });
 
-// Видалити відгук
 app.delete("/api/reviews/:id", (req, res) => {
   const reviewId = req.params.id;
   const sqlDelete = "DELETE FROM ReviewsCassettes WHERE ID = ?";

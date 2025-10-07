@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// Припустімо, що ви все ще використовуєте цей CSS-файл
 import "./Cassettes.css"; 
 
 export default function Cassettes() {
@@ -7,7 +6,6 @@ export default function Cassettes() {
   const [selectedId, setSelectedId] = useState("");
   const [selectedCassette, setSelectedCassette] = useState(null);
   
-  // 🔹 Форма для додавання/редагування касети (як formData у Vinyls.jsx)
   const [formData, setFormData] = useState({
     Title: "",
     Artist: "",
@@ -19,7 +17,6 @@ export default function Cassettes() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 🔹 CRUD для відгуків (відновлено з першого зразка Cassettes.jsx)
   const [userId, setUserId] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -29,9 +26,8 @@ export default function Cassettes() {
   const [modalRating, setModalRating] = useState(5);
   const [modalComment, setModalComment] = useState("");
 
-  // 🔹 Завантаження касет
   const loadCassettes = () => {
-    fetch("http://localhost:5000/api/cassettes") // API для касет
+    fetch("http://localhost:5000/api/cassettes") 
       .then((res) => res.json())
       .then((data) => setCassetteList(data))
       .catch((err) => console.error("Помилка при завантаженні:", err));
@@ -41,7 +37,6 @@ export default function Cassettes() {
     loadCassettes();
   }, []);
 
-  // 🔹 Завантаження відгуків (допоміжна функція)
   const loadReviews = (id) => {
     fetch(`http://localhost:5000/api/cassettes/${id}/reviews`)
       .then((res) => res.json())
@@ -234,9 +229,9 @@ export default function Cassettes() {
 
   return (
     <div className="catalog-section">
-      <h2>Касети 📼</h2>
+      <h2>Касети</h2>
 
-      <button onClick={() => handleOpenModal()}>➕ Додати касету</button>
+      <button className="add-vinyl-btn" onClick={() => handleOpenModal()}>Додати касету</button>
 
       <select value={selectedId} onChange={handleSelectChange} className="select-item">
         <option value="">-- Оберіть касету --</option>
@@ -264,15 +259,15 @@ export default function Cassettes() {
 
           <div className="cassette-buttons">
             {/* Виклик модалки Vinyls-стилю для редагування */}
-            <button onClick={() => handleOpenModal(selectedCassette)}>✏️ Редагувати</button>
-            <button onClick={() => handleDelete(selectedCassette.ID)}>🗑️ Видалити</button>
+            <button onClick={() => handleOpenModal(selectedCassette)}>Редагувати</button>
+            <button className="delete-btn" onClick={() => handleDelete(selectedCassette.ID)}>Видалити</button>
           </div>
           
           {/* ФОРМА ДОДАВАННЯ ВІДГУКУ */}
           <form onSubmit={handleAddReview} className="review-form">
             <h4>Додати відгук:</h4>
             <input
-              placeholder="Ваш ID"
+              placeholder="Ім'я користувача"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
             />
@@ -299,12 +294,18 @@ export default function Cassettes() {
             ) : (
               reviews.map((r) => (
                 <div key={r.ID} className="review-item">
-                  <b>{r.userId}</b>: {r.rating}★ — {r.comment}
+                  <b className="v">{r.userId}</b>: {r.rating}★ — {r.comment}
                   <br />
-                  <small>{new Date(r.date).toLocaleString()}</small>
-                  <button onClick={() => openReviewModal(r)}>
-                    Редагувати / Видалити
-                  </button>
+                  <small className="v" >{new Date(r.date).toLocaleString()}</small>
+                  <div className="review-buttons">
+                    <button onClick={() => openReviewModal(r)}>Редагувати</button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => openReviewModal(r)}
+                    >
+                      Видалити
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -312,7 +313,6 @@ export default function Cassettes() {
         </div>
       )}
 
-      {/* 🔹 Модалка для касет (як у Vinyls.jsx) */}
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
@@ -361,8 +361,8 @@ export default function Cassettes() {
             />
 
             <div className="modal-actions">
-              <button onClick={handleSave}>💾 Зберегти</button>
-              <button onClick={handleCloseModal}>❌ Закрити</button>
+              <button onClick={handleSave}>Зберегти</button>
+              <button onClick={handleCloseModal}>Закрити</button>
             </div>
           </div>
         </div>

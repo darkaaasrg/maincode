@@ -1,0 +1,29 @@
+.posts {
+    display: flex;
+    flex-wrap: wrap; /* щоб пости підлаштовувалися під ширину */
+    gap: 20px;       /* відстань між постами */
+    padding: 20px;
+    justify-content: center; /* по центру */
+  }
+  
+  .posts img {
+    border-radius: 8px;   /* закруглені кути */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* легка тінь */
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .posts h3 {
+    font-size: 18px;
+    margin: 5px 0;
+    text-align: center;
+  }
+  
+  .posts p {
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 200px; /* обмежуємо ширину тексту */
+    text-align: center;
+    margin: 0 auto 15px auto;
+  }
+  
