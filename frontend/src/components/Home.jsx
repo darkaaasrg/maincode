@@ -3,7 +3,6 @@ import './Home.css';
 import ProductCard from "./ProductCard"; 
 import ProductDetails from "./ProductDetails";
 
-// Тестові дані для відображення на головній сторінці
 const ITEMS_DATA = [
   {
     id: 'v1',
@@ -15,7 +14,10 @@ const ITEMS_DATA = [
     genre: 'Progressive Rock',
     year: '1973',
     country: 'UK',
-    images: 'https://hardyvinyl.com/wp-content/uploads/2021/11/the-dark-side-of-the-moon.jpg',
+    images: ['https://hardyvinyl.com/wp-content/uploads/2021/11/the-dark-side-of-the-moon.jpg',
+            'https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRyn4bHn70NZJNFrDR2q0EPHt3Stq0oh-giakmojUej0sJVLmoiTkklU4aB3NOqK05LIelh3bL-cDaBcImFXJKrHxtSZjkdl5GkaYHR6guQgVmHqeCfNoOF', 
+            'https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRgQa-qLCNkSEbK5EqOSVrjZQV6qxaI1d3_GjlutzeChCbJNkzWgoBeYLN2jy3ChJ8StvdR1lusuOHb04yKm3QOwt1lV-i00V4MpqeWXT8'
+    ] 
   },
   {
     id: 'c1',
@@ -27,7 +29,10 @@ const ITEMS_DATA = [
     genre: 'Indie',
     year: '2024',
     country: 'UA',
-    images: 'https://vinyla.com/files/products/cd/180/219572/1.1280x1280.jpg?8183a7f03b60c137622f650f26c87a1f',
+    images: ['https://vinyla.com/files/products/cd/180/219572/4.1280x1280.jpg?79d090d6d5e91f0e8543994a22192d5d', 
+            'https://vinyla.com/files/products/cd/180/219572/1.1280x1280.jpg?8183a7f03b60c137622f650f26c87a1f',
+            'https://vinyla.com/files/products/cd/180/219572/2.1280x1280.jpg?adb3ea0a657252ff4dd1145c5969e98f'
+    ]
   },
   {
     id: 'v2',
@@ -47,25 +52,20 @@ const ITEMS_DATA = [
 ];
 
 export default function Home() {
-  // Зберігаємо об'єкт товару, який зараз переглядається
   const [selectedItem, setSelectedItem] = useState(null); 
 
-  // Функція для переходу на сторінку деталей
   const handleViewDetails = (item) => {
     setSelectedItem(item);
   };
 
-  // Функція для повернення до списку
   const handleBack = () => {
     setSelectedItem(null);
   };
 
-  // Якщо обрано елемент, показуємо ProductDetails
   if (selectedItem) {
     return <ProductDetails item={selectedItem} onBack={handleBack} />;
   }
 
-  // Інакше, показуємо список товарів
   return (
     <div className="home-container">
       <h1>Галерея наших продуктів</h1>

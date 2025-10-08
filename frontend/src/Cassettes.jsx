@@ -90,7 +90,6 @@ export default function Cassettes() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🔹 Додавання або оновлення (як у Vinyls.jsx)
   const handleSave = async () => {
     try {
       const method = selectedId ? "PUT" : "POST";
@@ -112,7 +111,6 @@ export default function Cassettes() {
         setCassetteList((prev) =>
           prev.map((c) => (c.ID === updated.ID ? updated : c))
         );
-        // Оновлюємо вибрану касету, щоб картка відображала зміни
         setSelectedCassette(updated); 
       } else {
         setCassetteList((prev) => [...prev, updated]);
@@ -125,7 +123,6 @@ export default function Cassettes() {
     }
   };
 
-  // 🔹 Видалення (як у Vinyls.jsx)
   const handleDelete = async (id) => {
     if (!window.confirm("Видалити цю касету?")) return;
     try {
@@ -142,9 +139,6 @@ export default function Cassettes() {
     }
   };
   
-// --- ЛОГІКА ВІДГУКІВ (ВІДНОВЛЕНО З ПЕРШОГО КОДУ) ---
-
-  // 🔹 Додавання відгуку
   const handleAddReview = async (e) => {
     e.preventDefault();
     if (!selectedCassette) return alert("Оберіть касету!");
@@ -225,8 +219,6 @@ export default function Cassettes() {
     }
   };
 
-// --- ВІДОБРАЖЕННЯ JSX ---
-
   return (
     <div className="catalog-section">
       <h2>Касети</h2>
@@ -258,12 +250,10 @@ export default function Cassettes() {
           )}
 
           <div className="cassette-buttons">
-            {/* Виклик модалки Vinyls-стилю для редагування */}
             <button onClick={() => handleOpenModal(selectedCassette)}>Редагувати</button>
             <button className="delete-btn" onClick={() => handleDelete(selectedCassette.ID)}>Видалити</button>
           </div>
           
-          {/* ФОРМА ДОДАВАННЯ ВІДГУКУ */}
           <form onSubmit={handleAddReview} className="review-form">
             <h4>Додати відгук:</h4>
             <input
@@ -386,7 +376,7 @@ export default function Cassettes() {
             />
             <div className="modal-buttons">
               <button onClick={saveReviewModal}>Зберегти</button>
-              <button onClick={deleteReviewModal}>Видалити</button>
+              <button className="m" onClick={deleteReviewModal}>Видалити</button>
               <button onClick={() => setReviewModalOpen(false)}>Відмінити</button>
             </div>
           </div>

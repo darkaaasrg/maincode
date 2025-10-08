@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './ProductDetails.css'
 
 export default function ProductDetails({ item, onBack }) {
 
@@ -6,21 +7,18 @@ export default function ProductDetails({ item, onBack }) {
 
   if (!item) return null;
 
-  // Функція переходу до наступного зображення
   const goToNext = () => {
     setCurrentImageIndex((prevIndex) => 
       (prevIndex + 1) % item.images.length
     );
   };
 
-  // Функція переходу до попереднього зображення
   const goToPrev = () => {
     setCurrentImageIndex((prevIndex) => 
       (prevIndex - 1 + item.images.length) % item.images.length
     );
   };
   
-  // Вибираємо зображення для відображення
   const currentImage = item.images[currentImageIndex];
 
   return (
@@ -33,8 +31,7 @@ export default function ProductDetails({ item, onBack }) {
       
       <div className="details-content">
         
-        {/* ======================================= */}
-        {/* 🆕 БЛОК СЛАЙДЕРА */}
+  
         <div className="image-slider-container">
           <img 
             src={currentImage} 
@@ -42,16 +39,14 @@ export default function ProductDetails({ item, onBack }) {
             className="details-image" 
           />
           
-          {/* Кнопки навігації, якщо фотографій більше однієї */}
           {item.images.length > 1 && (
             <div className="slider-controls">
-              <button onClick={goToPrev}>&lt; Попередня</button>
+              <button onClick={goToPrev}>Попередня</button>
               <span>{currentImageIndex + 1} / {item.images.length}</span>
-              <button onClick={goToNext}>Наступна &gt;</button>
+              <button onClick={goToNext}>Наступна</button>
             </div>
           )}
         </div>
-        {/* ======================================= */}
         
         <div className="info-block">
           <h2>{item.artist}</h2>

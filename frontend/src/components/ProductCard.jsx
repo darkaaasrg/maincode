@@ -1,12 +1,19 @@
+// src/components/ProductCard.jsx
+
 import React from 'react';
 import './ProductCard.css'; 
 
 export default function ProductCard({ item, onViewDetails }) {
+  
+  const imageUrl = (item.images && item.images.length > 0) 
+                   ? item.images[0] 
+                   : 'https://via.placeholder.com/150'; // Тимчасова заглушка
+  
   return (
     <div className={`product-card ${item.type.toLowerCase()}`}>
       <div className="product-image-container">
         <img 
-          src={item.imageUrl} 
+          src={imageUrl} // ВИКОРИСТОВУЄМО ВИПРАВЛЕНЕ ЗОБРАЖЕННЯ
           alt={`${item.title} - ${item.artist}`} 
           width="150px" 
         />
@@ -19,7 +26,7 @@ export default function ProductCard({ item, onViewDetails }) {
         
         <button 
           className="view-btn"
-          onClick={() => onViewDetails(item)} // Передаємо об'єкт для перегляду
+          onClick={() => onViewDetails(item)}
         >
           Переглянути деталі
         </button>
