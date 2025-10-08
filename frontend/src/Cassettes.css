@@ -1,4 +1,3 @@
-/* Загальний контейнер */
 .catalog-section {
   max-width: 900px;
   margin: 20px auto;
@@ -6,7 +5,6 @@
   font-family: Arial, sans-serif;
 }
 
-/* Список вінілів */
 .select-item {
   width: 100%;
   padding: 8px;
@@ -14,13 +12,13 @@
   font-size: 16px;
 }
 
-/* Картка вінiлу */
 .product-card {
   border: 1px solid #ccc;
   padding: 15px;
   margin-top: 15px;
   border-radius: 8px;
   background-color: #f9f9f9;
+  width: 91%;
 }
 
 .product-card img {
@@ -29,7 +27,6 @@
   display: block;
 }
 
-/* Кнопки для вінiлу */
 .vinyl-buttons {
   margin-top: 10px;
 }
@@ -56,7 +53,6 @@
   color: #fff;
 }
 
-/* Форма відгуків */
 .review-form {
   margin-top: 20px;
   display: flex;
@@ -79,7 +75,6 @@
   cursor: pointer;
 }
 
-/* Відгуки */
 .reviews {
   margin-top: 20px;
 }
@@ -118,7 +113,6 @@
   color: #fff;
 }
 
-/* Модалка (вінiл та відгуки) */
 .modal,
 .modal-overlay {
   position: fixed;
@@ -133,7 +127,6 @@
   z-index: 1000;
 }
 
-/* Вміст модалки */
 .modal-content {
   background-color: #fff;
   padding: 20px 25px;
@@ -146,7 +139,6 @@
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* Поля вводу всередині модалки */
 .modal-content input,
 .modal-content textarea {
   padding: 6px 8px;
@@ -158,11 +150,10 @@
 
 .modal-overlay .modal-content {
   width: 390px;
-  height: 250px; /* фіксований розмір */
+  height: 250px; 
   overflow-y: auto;
 }
 
-/* Кнопки всередині модалки */
 .modal-actions,
 .modal-buttons {
   display: flex;
@@ -172,7 +163,6 @@
   justify-content: center;
 }
 
-.modal-actions button,
 .modal-buttons button {
   padding: 6px 12px;
   border: none;
@@ -181,22 +171,20 @@
   
 }
 
-.modal-actions button:first-child,
 .modal-buttons button:first-child {
   background-color: #3498db;
   color: #fff;
 }
 
-.modal-actions button.delete-btn,
 .modal-buttons button.delete-btn {
   background-color: #e74c3c;
   color: #fff;
 }
 
-.modal-actions button:last-child,
 .modal-buttons button:last-child {
   background-color: #e74c3c;
   color: #fff;
+  
 }
 
 .modal-content textarea {
@@ -282,3 +270,4 @@ button.add-vinyl-btn:hover {
   background-color: #3498db;
   color: #fff;
 }
+

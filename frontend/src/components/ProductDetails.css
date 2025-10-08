@@ -1,0 +1,92 @@
+.product-details-page {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.product-details-page h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.back-btn {
+    background: none;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.details-content {
+    display: flex;
+    gap: 40px; /* Простір між зображенням та текстом */
+    flex-wrap: wrap; /* Дозволяє перенесення на мобільних пристроях */
+    align-items: flex-start; /* Вирівнюємо елементи по верхньому краю */
+}
+
+.info-block {
+    flex: 1; 
+    min-width: 300px;
+    line-height: 1.6;
+}
+
+.info-block p strong {
+    font-weight: bold;
+    color: #333;
+}
+
+.image-slider-container {
+    width: 350px; /* Фіксована ширина для блоку галереї */
+    flex-shrink: 0; /* Не дозволяє Flexbox стискати цей блок */
+    position: relative;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.details-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px auto;
+}
+
+.slider-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.slider-controls button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.slider-controls button:hover {
+    background-color: #0056b3;
+}
+
+.slider-controls span {
+    font-weight: bold;
+}
+
+.full-description {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #ccc;
+}
+
+.full-description h4 {
+    margin-bottom: 10px;
+    color: #555;
+}
