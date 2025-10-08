@@ -1,28 +1,29 @@
-import React, { useState } from "react";
-import { Review } from "../data/models";
-import ReviewForm from "./ReviewForm";
-import ReviewList from "./ReviewList";
+import React from 'react';
+import './ProductCard.css'; 
 
-export default function ProductCard({ product }) {
-  const [reviews, setReviews] = useState(product.reviews);
-
-  const addNewReview = (userId, rating, comment) => {
-    const newReview = new Review(userId, rating, comment);
-    product.addReview(newReview);
-    setReviews([...product.reviews]);
-  };
-
+export default function ProductCard({ item, onViewDetails }) {
   return (
-    <div className="border p-4 rounded-xl shadow-lg bg-white">
-      <h2 className="text-xl font-bold mb-2">{product.title}</h2>
-      <p className="text-gray-600">{product.artist}</p>
-      <p><b>Жанр:</b> {product.genre}</p>
-      <p><b>Рік:</b> {product.year}</p>
-      <p><b>Формат:</b> {product.format}</p>
-      <p><b>В наявності:</b> {product.inStock}</p>
-
-      <ReviewForm onAdd={addNewReview} />
-      <ReviewList reviews={reviews} />
+    <div className={`product-card ${item.type.toLowerCase()}`}>
+      <div className="product-image-container">
+        <img 
+          src={item.imageUrl} 
+          alt={`${item.title} - ${item.artist}`} 
+          width="150px" 
+        />
+      </div>
+      
+      <div className="product-info">
+        <h3>{item.title}</h3>
+        <p><strong>{item.type}</strong> від {item.artist}</p>
+        <p className="short-desc">{item.description.substring(0, 70)}...</p>
+        
+        <button 
+          className="view-btn"
+          onClick={() => onViewDetails(item)} // Передаємо об'єкт для перегляду
+        >
+          Переглянути деталі
+        </button>
+      </div>
     </div>
   );
 }
