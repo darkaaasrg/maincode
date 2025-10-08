@@ -32,7 +32,7 @@ export default function ReviewForm({ onAdd }) {
       <input
         className="border p-2 mr-2 rounded w-64"
         placeholder="Ваш коментар"
-        value={comment}
+        value = {comment}
         onChange={(e) => setComment(e.target.value)}
       />
       <button className="bg-blue-500 text-white p-2 rounded">Додати</button>
