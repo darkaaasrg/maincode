@@ -5,6 +5,7 @@ import Vinyls from "./Vinyls";
 import Cassettes from "./Cassettes";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import './index.css'
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
         <Route path="/cassettes" element={<Cassettes />} />
       </Routes>
 
-      <Footer />
+      <Footer class="footer" />
     </Router>
 
     

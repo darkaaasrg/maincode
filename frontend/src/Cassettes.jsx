@@ -376,7 +376,7 @@ export default function Cassettes() {
             />
             <div className="modal-buttons">
               <button onClick={saveReviewModal}>Зберегти</button>
-              <button className="m" onClick={deleteReviewModal}>Видалити</button>
+              <button className="delete-btn" onClick={deleteReviewModal}>Видалити</button>
               <button onClick={() => setReviewModalOpen(false)}>Відмінити</button>
             </div>
           </div>
