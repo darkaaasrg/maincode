@@ -29,7 +29,6 @@ html, body, #root {
   margin-bottom: 20px;
 }
 
-/* Select для вибору продукту */
 .select-item {
   width: 100%;
   padding: 10px 12px;
@@ -115,4 +114,13 @@ html, body, #root {
 .review-item small {
   color: #888;
   font-size: 12px;
+}
+
+.footer {
+  background-color: #222;
+  color: white;
+  text-align: center;
+  padding: 15px 0;
+  /* margin-top: 30px; - цей марджин можна прибрати,
+     якщо він не потрібен для візуального відступу від контенту */
 }
