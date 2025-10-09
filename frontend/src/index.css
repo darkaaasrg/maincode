@@ -1,16 +1,18 @@
-html, body, #root {
+html, body {
 
-  height: auto; 
-  min-height: 100vh; 
-  overflow-y: visible; 
-  overflow-x: hidden;
   margin: 0;
   padding: 0;
+  height: 100%; 
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
 }
 
  h1 {
   text-align: center;
-  
  } 
 
 .catalog-section {
@@ -116,11 +118,21 @@ html, body, #root {
   font-size: 12px;
 }
 
+.app-layout-wrapper {
+  display: flex;
+  flex-direction: column; 
+  min-height: 100vh; 
+}
+
+.main-content-area {
+  flex-grow: 1; 
+}
+
 .footer {
-  background-color: #222;
+  flex-shrink: 0; 
+  background-color: #333; 
   color: white;
-  text-align: center;
   padding: 15px 0;
-  /* margin-top: 30px; - цей марджин можна прибрати,
-     якщо він не потрібен для візуального відступу від контенту */
+  text-align: center;
+  width: 100%;
 }
