@@ -172,7 +172,6 @@
   justify-content: center;
 }
 
-.modal-actions button,
 .modal-buttons button {
   padding: 6px 12px;
   border: none;
@@ -181,23 +180,21 @@
   
 }
 
-.modal-actions button:first-child,
 .modal-buttons button:first-child {
   background-color: #3498db;
   color: #fff;
 }
 
-.modal-actions button.delete-btn,
 .modal-buttons button.delete-btn {
   background-color: #e74c3c;
   color: #fff;
 }
 
-.modal-actions button:last-child,
 .modal-buttons button:last-child {
-  background-color: #e74c3c;
+  background-color: #beb9b9;
   color: #fff;
-}
+  
+}і
 
 .modal-content textarea {
   resize: none;

@@ -23,9 +23,10 @@
 
 .details-content {
     display: flex;
-    gap: 40px; /* Простір між зображенням та текстом */
-    flex-wrap: wrap; /* Дозволяє перенесення на мобільних пристроях */
-    align-items: flex-start; /* Вирівнюємо елементи по верхньому краю */
+    gap: 40px; 
+    flex-wrap: wrap;
+    align-items: flex-start; 
+
 }
 
 .info-block {
@@ -40,20 +41,30 @@
 }
 
 .image-slider-container {
-    width: 350px; /* Фіксована ширина для блоку галереї */
-    flex-shrink: 0; /* Не дозволяє Flexbox стискати цей блок */
+    width: 350px; 
+    flex-shrink: 0; 
     position: relative;
     border: 1px solid #ddd;
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    /* Забезпечуємо центрування вмісту для випадку, коли зображення менші */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .details-image {
-    max-width: 100%;
-    height: auto;
+    width: 350px; 
+    height: 350px;
+    
+    /* 🟢 КРИТИЧНО: Забезпечує, що зображення заповнить простір, обрізавши краї */
+    object-fit: cover; 
+    
+    /* Інші стилі */
     display: block;
-    margin: 0 auto 10px auto;
+    margin: 0 auto 10px auto; /* Центруємо зображення */
+    border-radius: 4px;
 }
 
 .slider-controls {
