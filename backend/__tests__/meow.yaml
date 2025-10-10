@@ -1,0 +1,239 @@
+openapi: 3.0.3
+info:
+  title: Reviews API
+  version: 1.0.0
+  description: >
+    API для управління відгуками користувачів на вінілові платівки та касети.
+    Усі відгуки відображаються без фільтрації (фільтрація відбувається на клієнті).
+
+servers:
+  - url: http://localhost:5000/api
+    description: Локальний сервер
+
+paths:
+  /reviews:
+    get:
+      summary: Отримати всі відгуки
+      tags: 
+        - Reviews
+      responses:
+        "200":
+          description: Успішне отримання всіх відгуків. Повертає список відгуків.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReviewResponse"
+
+    post:
+      summary: Створити новий відгук
+      tags: 
+        - Reviews
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewCreateRequest"
+      responses:
+        "201":
+          description: Відгук успішно створено. Повертає об'єкт створеного відгуку.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewResponse"
+        "400":
+          description: Помилка валідації (відсутнє обов’язкове поле або текст < 3 символів).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /reviews/{id}:
+    get:
+      summary: Отримати деталі одного відгуку
+      tags: 
+        - Reviews
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "r-002"
+      responses:
+        "200":
+          description: Відгук знайдено.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewResponse"
+        "501":
+          description: Не реалізовано (повертає заглушку).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      summary: Оновити відгук
+      tags: 
+        - Reviews
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "r-002"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewUpdateRequest"
+      responses:
+        "200":
+          description: Відгук оновлено.
+        "400":
+          description: Некоректні дані (наприклад, текст < 3 символів).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Відгук не знайдено.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Видалити відгук
+      tags:
+        - Reviews
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "r-002"
+      responses:
+        "204":
+          description: Відгук успішно видалено (Немає контенту).
+        "404":
+          description: Відгук не знайдено.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /health:
+    get:
+      summary: Перевірка працездатності API
+      tags:
+        - System
+      responses:
+        "200":
+          description: Система працює
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: ok
+
+components:
+  schemas:
+    ReviewCreateRequest:
+      type: object
+      required: 
+        - user
+        - productType
+        - productId
+        - text
+      properties:
+        user:
+          type: string
+          example: "daryna_k"
+        productType:
+          type: string
+          enum: [vinyl, cassette]
+          example: "vinyl"
+        productId:
+          type: string
+          example: "v-004"
+        text:
+          type: string
+          minLength: 3
+          example: "Дуже атмосферний альбом!"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+
+    ReviewUpdateRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          example: "Оновлений коментар: чудовий звук!"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+
+    ReviewResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "r-001"
+        user:
+          type: string
+          example: "daryna_k"
+        productType:
+          type: string
+          example: "cassette"
+        productId:
+          type: string
+          example: "c-005"
+        text:
+          type: string
+          example: "Супер звук, справжній ретро вайб!"
+        rating:
+          type: integer
+          example: 5
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-10-08T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-10-08T11:00:00Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "ValidationError"
+        code:
+          type: string
+          example: "EMPTY_REVIEW_OR_MISSING_FIELD"
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: "text"
+              message:
+                type: string
+                example: "Review text must be at least 3 characters and all fields are required."
