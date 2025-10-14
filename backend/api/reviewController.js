@@ -20,20 +20,47 @@ const validateReview = (data) => {
     return null;
 };
 
-// ВИДАЛИТИ ВЕСЬ ЦЕЙ БЛОК 
 router.get("/reviews", (req, res) => {
-    const sqlCassettes = "SELECT ID, userId, rating, comment, date, 'cassette' as product_type, cassette_id as productId FROM ReviewsCassettes";
-    const sqlVinyls = "SELECT ID, userId, rating, comment, date, 'vinyl' as product_type, vinyl_id as productId FROM ReviewsVinyls";
-    db.query(sqlCassettes, (err, cassResults) => {
-        if (err) return res.status(500).json({ error: "DBError", message: "Cassettes query failed: " + err.message });
+    // Отримуємо параметри з URL: ?productType=...&productId=...
+    const { productType, productId } = req.query;
+
+    // ПЕРЕВІРКА: Якщо параметри для фільтрації передані
+    if (productType && productId) {
+        // Визначаємо, з якою таблицею та полем працювати
+        const tableName = productType === 'vinyl' ? "ReviewsVinyls" : "ReviewsCassettes";
+        const productField = productType === 'vinyl' ? "vinyl_id" : "cassette_id";
         
-        db.query(sqlVinyls, (err2, vinylResults) => {
-            if (err2) return res.status(500).json({ error: "DBError", message: "Vinyls query failed: " + err2.message });
-            res.status(200).json([...cassResults, ...vinylResults]);
+        // Створюємо SQL-запит з умовою WHERE для фільтрації
+        const sql = `
+            SELECT ID, userId, rating, comment, date, '${productType}' as product_type, ${productField} as productId 
+            FROM ${tableName} 
+            WHERE ${productField} = ?`;
+
+        // Виконуємо запит з ID товару
+        db.query(sql, [productId], (err, results) => {
+            if (err) {
+                return res.status(500).json({ error: "DBError", message: "Query failed: " + err.message });
+            }
+            // Повертаємо тільки відфільтровані відгуки
+            res.status(200).json(results);
         });
-    });
+
+    } else {
+        // ЯКЩО ПАРАМЕТРИ НЕ ПЕРЕДАНІ: залишаємо стару логіку (завантажити всі)
+        // Це корисно для адмін-панелі або інших випадків
+        const sqlCassettes = "SELECT ID, userId, rating, comment, date, 'cassette' as product_type, cassette_id as productId FROM ReviewsCassettes";
+        const sqlVinyls = "SELECT ID, userId, rating, comment, date, 'vinyl' as product_type, vinyl_id as productId FROM ReviewsVinyls";
+        
+        db.query(sqlCassettes, (err, cassResults) => {
+            if (err) return res.status(500).json({ error: "DBError", message: "Cassettes query failed: " + err.message });
+            
+            db.query(sqlVinyls, (err2, vinylResults) => {
+                if (err2) return res.status(500).json({ error: "DBError", message: "Vinyls query failed: " + err2.message });
+                res.status(200).json([...cassResults, ...vinylResults]);
+            });
+        });
+    }
 });
-// ДО ЦЬОГО МІСЦЯ
 
 router.post("/reviews", (req, res) => {
     const validationError = validateReview(req.body);
@@ -48,10 +75,10 @@ router.post("/reviews", (req, res) => {
     const productField = productType === 'vinyl' ? "vinyl_id" : "cassette_id";
     
     const sql = `
-        INSERT INTO ${tableName} (${productField}, userId, rating, comment, date)
-        VALUES (?, ?, ?, ?, NOW())`;
-    
-    db.query(sql, [productId, user, rating || 5, finalComment], (err, result) => {
+    INSERT INTO ${tableName} (${productField}, userId, rating, comment, date, productType)
+    VALUES (?, ?, ?, ?, NOW(), ?)`; // <--- Додали ще один '?'
+
+    db.query(sql, [productId, user, rating || 5, finalComment, productType], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "DBError", message: err.message });

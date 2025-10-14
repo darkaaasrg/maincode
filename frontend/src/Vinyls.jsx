@@ -45,20 +45,19 @@ export default function Vinyls() {
   };
   
   // --- Завантаження відгуків (ПОВЕРНУТО) ---
-  const loadReviews = (id) => {
-    // 💡 ВИКОРИСТОВУЄМО УНІФІКОВАНИЙ МАРШРУТ GET /reviews ТА ФІЛЬТРУЄМО
-    fetch("http://localhost:5000/api/reviews")
+ const loadReviews = (id) => {
+    // Створюємо правильний URL з параметрами для бекенда
+    const url = `http://localhost:5000/api/reviews?productType=vinyl&productId=${id}`;
+
+    fetch(url) // <-- Робимо запит на вже відфільтровані дані!
         .then((res) => res.json())
-        .then((data) => {
-            const productReviews = data
-                .filter(r => 
-                    String(r.productId || r.vinyl_id || r.cassette_id) === String(id)
-                )
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
-            setReviews(productReviews);
+        .then((filteredData) => {
+            // Фільтрувати більше не потрібно, сервер все зробив за нас!
+            const sortedReviews = filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            setReviews(sortedReviews);
         })
         .catch((err) => console.error("Помилка завантаження відгуків:", err));
-  };
+};
 
   useEffect(() => {
     loadVinyls();
