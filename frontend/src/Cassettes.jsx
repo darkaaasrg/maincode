@@ -45,17 +45,18 @@ export default function Cassettes() {
     loadCassettes();
   }, []);
   const loadReviews = (id) => {
-    fetch(API_REVIEWS_URL)
-      .then((res) => res.json())
-      .then((data) => {
-        const productReviews = data
-          .filter((r) => String(r.productId) === String(id))
-          .sort((a, b) => new Date(b.date) - new Date(a.date));
-        setReviews(productReviews);
-      })
-      .catch((err) => console.error("Помилка завантаження відгуків:", err));
-  };
+    // Створюємо правильний URL з параметрами для бекенда
+    const url = `http://localhost:5000/api/reviews?productType=cassette&productId=${id}`;
 
+    fetch(url) // <-- Робимо запит на вже відфільтровані дані!
+        .then((res) => res.json())
+        .then((filteredData) => {
+            // Фільтрувати більше не потрібно, сервер все зробив за нас!
+            const sortedReviews = filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            setReviews(sortedReviews);
+        })
+        .catch((err) => console.error("Помилка завантаження відгуків:", err));
+};
   useEffect(() => {
     if (selectedId) loadReviews(selectedId);
   }, [selectedId, refreshKey]);
