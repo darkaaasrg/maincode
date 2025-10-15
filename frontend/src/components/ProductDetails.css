@@ -48,7 +48,6 @@
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    /* Забезпечуємо центрування вмісту для випадку, коли зображення менші */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -57,13 +56,9 @@
 .details-image {
     width: 350px; 
     height: 350px;
-    
-    /* 🟢 КРИТИЧНО: Забезпечує, що зображення заповнить простір, обрізавши краї */
     object-fit: cover; 
-    
-    /* Інші стилі */
     display: block;
-    margin: 0 auto 10px auto; /* Центруємо зображення */
+    margin: 0 auto 10px auto; 
     border-radius: 4px;
 }
 

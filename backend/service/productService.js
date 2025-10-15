@@ -1,4 +1,3 @@
-// service/productService.js
 import { Product, Review } from "../domain/product.js";
 
 let products = []; // Тимчасове "сховище" (імітація БД)
@@ -36,7 +35,7 @@ export const productService = {
 
   addReview(productId, userId, rating, comment) {
     const product = this.getById(productId);
-    const review = new Review(userId, rating, comment);
+    const review = new Review(userId, rating, comment); //викорстовує клас
     product.addReview(review);
     return review;
   }
