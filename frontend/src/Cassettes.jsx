@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Cassettes.css";
+import { fetchWithResilience } from "./lib/http";
+import { getOrReuseKey } from "./lib/idempotency";
 
 const alert = (msg) => console.log("ALERT:", msg);
 const confirm = window.confirm;
@@ -8,6 +10,10 @@ const ENTITY_TYPE = "cassette";
 const API_REVIEWS_URL = "http://localhost:5000/api/reviews";
 
 export default function Cassettes() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [failureCount, setFailureCount] = useState(0);
+  const [isDegraded, setIsDegraded] = useState(false);
+  const [modalError, setModalError] = useState("");
 
   const [cassetteList, setCassetteList] = useState([]);
   const [selectedId, setSelectedId] = useState("");
@@ -45,18 +51,27 @@ export default function Cassettes() {
     loadCassettes();
   }, []);
   const loadReviews = (id) => {
-    // Створюємо правильний URL з параметрами для бекенда
     const url = `http://localhost:5000/api/reviews?productType=cassette&productId=${id}`;
 
-    fetch(url) // <-- Робимо запит на вже відфільтровані дані!
+    fetch(url)
         .then((res) => res.json())
         .then((filteredData) => {
-            // Фільтрувати більше не потрібно, сервер все зробив за нас!
             const sortedReviews = filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
             setReviews(sortedReviews);
         })
         .catch((err) => console.error("Помилка завантаження відгуків:", err));
 };
+ useEffect(() => {
+        if (failureCount >= 3) {
+            setIsDegraded(true);
+            const timer = setTimeout(() => {
+                setIsDegraded(false);
+                setFailureCount(0);
+            }, 30000);
+            return () => clearTimeout(timer);
+        }
+    }, [failureCount]);
+
   useEffect(() => {
     if (selectedId) loadReviews(selectedId);
   }, [selectedId, refreshKey]);
@@ -143,62 +158,83 @@ export default function Cassettes() {
 
   const handleAddReview = async (e) => {
     e.preventDefault();
+    
+    // Залишаємо клієнтську валідацію для гарного UX
+    if (!userId || !comment) {
+        return setPostError("Ім'я та коментар не можуть бути порожніми.");
+    }
+    
+    setIsSubmitting(true); // Блокуємо кнопку
     setPostError("");
-    if (!selectedCassette) return setPostError("Оберіть касету!");
+    
+    const payload = {
+        user: userId,
+        rating,
+        comment,
+        productType: "cassette", // Важливо: тут 'cassette'
+        productId: selectedCassette.ID,
+    };
 
     try {
-      const res = await fetch(API_REVIEWS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user: userId,
-          rating,
-          comment,
-          productType: ENTITY_TYPE,
-          productId: selectedCassette.ID,
-        }),
-      });
-      const data = await res.json();
-      if (res.status === 201) {
-        setRefreshKey((prev) => prev + 1);
+        const idemKey = getOrReuseKey(payload);
+        const res = await fetchWithResilience("http://localhost:5000/api/reviews", {
+            method: "POST",
+            body: JSON.stringify(payload),
+            idempotencyKey: idemKey,
+            retry: { retries: 3, baseDelayMs: 300, timeoutMs: 3500 },
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || "Невідома помилка сервера");
+        }
+
+        setFailureCount(0);
+        setRefreshKey(k => k + 1);
         setUserId("");
         setComment("");
-        setRating(5);
-      } else if (res.status === 400) {
-        const validationMessage = data.details?.[0]?.message || "Помилка валідації на сервері.";
-        setPostError(`Помилка 400: ${validationMessage}`);
-      } else {
-        throw new Error(data.message || `Помилка ${res.status}`);
-      }
-    } catch (err) {
-      console.error(err);
-      setPostError("Не вдалося додати відгук. Перевірте консоль.");
+    } catch (error) {
+        console.error("Final error after retries:", error);
+        setPostError(`Помилка: ${error.message}`);
+        setFailureCount(c => c + 1);
+    } finally {
+        setIsSubmitting(false);
     }
-  };
+};
 
   const openReviewModal = (review) => {
     setCurrentReview(review);
     setModalRating(review.rating);
     setModalComment(review.comment);
     setReviewModalOpen(true);
+    setModalError("");
   };
 
-  const saveReviewModal = async () => {
-    try {
-      const res = await fetch(`${API_REVIEWS_URL}/${currentReview.ID}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating: modalRating, comment: modalComment }),
-      });
-      if (res.status !== 200) throw new Error("Помилка при оновленні відгуку");
-      setRefreshKey((prev) => prev + 1);
-      setReviewModalOpen(false);
-      setCurrentReview(null);
-    } catch (err) {
-      console.error(err);
-      alert("Не вдалося оновити відгук.");
+const saveReviewModal = async () => {
+    if (modalComment.trim().length < 3) {
+         setModalError("Коментар повинен містити щонайменше 3 символи.");
+        return;
     }
-  };
+
+    try {
+        const res = await fetch(
+            `http://localhost:5000/api/reviews/${currentReview.ID}`,
+            {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rating: modalRating, comment: modalComment }),
+            }
+        );
+        if (res.status !== 200) throw new Error("Помилка при оновленні відгуку");
+        
+        setRefreshKey(prev => prev + 1);
+        setReviewModalOpen(false);
+        setCurrentReview(null);
+    } catch (err) {
+        console.error(err);
+        alert("Не вдалося оновити відгук.");
+    }
+};
 
   const deleteReviewModal = async () => {
     if (!confirm("Видалити відгук?")) return;

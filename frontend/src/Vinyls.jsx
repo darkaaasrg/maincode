@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from "react";
-// ❌ ВИДАЛЕНО: import ReviewList, оскільки форма тепер тут
 import "./Vinyls.css";
-// Замінюємо window.alert та window.confirm на консольний вивід/вбудовані функції
+import { fetchWithResilience } from "./lib/http";
+import { getOrReuseKey } from "./lib/idempotency";
+
 const alert = (msg) => console.log('ALERT:', msg);
 const confirm = window.confirm; 
 
 export default function Vinyls() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [failureCount, setFailureCount] = useState(0);
+  const [isDegraded, setIsDegraded] = useState(false);
   const [vinylList, setVinylList] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [selectedVinyl, setSelectedVinyl] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0); 
-  
-  // 💡 СТАНИ ФОРМИ ВІДГУКУ (ЗАЛИШЕНО)
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [modalError, setModalError] = useState("");
+
   const [postError, setPostError] = useState(""); 
   const [userId, setUserId] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
-  const [reviews, setReviews] = useState([]); // Повертаємо стан відгуків сюди
+  const [reviews, setReviews] = useState([]);
 
-  // 🔹 Для форми вінілу
   const [formData, setFormData] = useState({
     Title: "",
     Artist: "",
@@ -30,29 +33,34 @@ export default function Vinyls() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 🔹 Модалка для редагування / видалення відгуків
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [currentReview, setCurrentReview] = useState(null);
   const [modalRating, setModalRating] = useState(5);
   const [modalComment, setModalComment] = useState("");
 
-  // --- Завантаження вінілів ---
   const loadVinyls = () => {
-    fetch("http://localhost:5000/api/vinyls")
-      .then((res) => res.json())
-      .then((data) => setVinylList(data))
-      .catch((err) => console.error("Помилка при завантаженні вінілів:", err));
-  };
-  
-  // --- Завантаження відгуків (ПОВЕРНУТО) ---
+  fetch("http://localhost:5000/api/vinyls")
+    .then((res) => res.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setVinylList(data);
+      } else {
+        console.error("Отримано невірний формат даних для вінілів:", data);
+        setVinylList([]);
+      }
+    })
+    .catch((err) => {
+        console.error("Помилка при завантаженні вінілів:", err);
+        setVinylList([]);
+    });
+};
+
  const loadReviews = (id) => {
-    // Створюємо правильний URL з параметрами для бекенда
     const url = `http://localhost:5000/api/reviews?productType=vinyl&productId=${id}`;
 
-    fetch(url) // <-- Робимо запит на вже відфільтровані дані!
+    fetch(url)
         .then((res) => res.json())
         .then((filteredData) => {
-            // Фільтрувати більше не потрібно, сервер все зробив за нас!
             const sortedReviews = filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
             setReviews(sortedReviews);
         })
@@ -64,23 +72,29 @@ export default function Vinyls() {
   }, []);
 
   useEffect(() => {
-      // Перезавантажуємо відгуки при зміні selectedId або примусовому оновленні
       if (selectedId) {
           loadReviews(selectedId);
       }
-  }, [selectedId, refreshKey]); // Додано refreshKey для оновлення
+  }, [selectedId, refreshKey]); 
+  
+  useEffect(() => {
+      if (failureCount >= 3) {
+          setIsDegraded(true);
+          const timer = setTimeout(() => {
+              setIsDegraded(false);
+              setFailureCount(0);
+          }, 30000);
+          return () => clearTimeout(timer);
+      }
+    }, [failureCount]);
 
-  // --- Вибір вінілу ---
   const handleSelectChange = (e) => {
     const id = e.target.value;
     setSelectedId(id);
     const found = vinylList.find((v) => v.ID.toString() === id);
     setSelectedVinyl(found);
-    setRefreshKey(prev => prev + 1); // Викликає useEffect і loadReviews
+    setRefreshKey(prev => prev + 1);
   };
-
-  // --- Модалка для вінілу (handleOpenModal, handleCloseModal, handleChange, handleSave, handleDelete) ---
-  // ... (КОД ЗАЛИШАЄТЬСЯ НЕЗМІННИМ) ...
 
   const handleOpenModal = (vinyl = null) => {
     if (vinyl) {
@@ -166,83 +180,82 @@ export default function Vinyls() {
     }
   };
   
-  // ----------------------------------------------------------------------------------
-  // 💡 ПОВЕРНЕНО: handleAddReview (Для роботи вбудованої форми)
-  // ----------------------------------------------------------------------------------
   const handleAddReview = async (e) => {
-    e.preventDefault();
-    setPostError("");
-
-    if (!selectedVinyl) return setPostError("Оберіть вініл!");
-    
-    // ❌ КРИТИЧНЕ ВИПРАВЛЕННЯ: Ми дозволяємо пустим рядкам піти на сервер для 400!
-
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/reviews`, 
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            user: userId, 
-            rating: rating, 
-            comment: comment,
+        e.preventDefault();
+        setPostError("");
+        // if (!userId || !comment) {
+        //     return setPostError("Ім'я та коментар не можуть бути порожніми.");
+        // }
+        setIsSubmitting(true);
+        setPostError("");
+        const payload = {
+            user: userId,
+            rating,
+            comment,
             productType: "vinyl",
-            productId: selectedVinyl.ID 
-          }),
+            productId: selectedVinyl.ID,
+        };
+
+        try {
+            const idemKey = getOrReuseKey(payload);
+            const res = await fetchWithResilience("http://localhost:5000/api/reviews", {
+                method: "POST",
+                body: JSON.stringify(payload),
+                idempotencyKey: idemKey,
+                retry: { retries: 3, baseDelayMs: 300, timeoutMs: 3500 },
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Невідома помилка сервера");
+            }
+
+            setFailureCount(0);
+            setRefreshKey(k => k + 1);
+            setUserId("");
+            setComment("");
+        } catch (error) {
+            console.error("Final error after retries:", error);
+            setPostError(`Помилка: ${error.message}`);
+            setFailureCount(c => c + 1); 
         }
-      );
-      
-      const responseData = await res.json();
-      
-      if (res.status === 201) {
-        // Успіх
-        setRefreshKey(prev => prev + 1); // Оновлюємо список через useEffect
-        setUserId("");
-        setComment("");
-        setRating(5);
-      } else if (res.status === 400) {
-        // 400 Bad Request від сервера
-        const validationMessage = responseData.details?.[0]?.message || "Помилка валідації на сервері.";
-        setPostError(`Помилка 400: ${validationMessage}`);
-      } else {
-         throw new Error(responseData.message || `Помилка ${res.status} при додаванні відгуку.`);
-      }
-    } catch (err) {
-      console.error(err);
-      setPostError("Не вдалося додати відгук. Перевірте консоль.");
-    }
-  };
-
-
-  // --- Модалка для редагування / видалення відгуків ---
+        finally {
+        setIsSubmitting(false);
+        }
+    };
   const openReviewModal = (review) => {
     setCurrentReview(review);
     setModalRating(review.rating);
     setModalComment(review.comment);
     setReviewModalOpen(true);
+    setModalError("");
   };
 
-  const saveReviewModal = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/reviews/${currentReview.ID}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rating: modalRating, comment: modalComment }), 
-        }
-      );
-
-      if (res.status !== 200) throw new Error("Помилка при оновленні відгуку");
-      setRefreshKey(prev => prev + 1);
-      setReviewModalOpen(false);
-      setCurrentReview(null);
-    } catch (err) {
-      console.error(err);
-      alert("Не вдалося оновити відгук.");
+ const saveReviewModal = async () => {
+    if (modalComment.trim().length < 3) {
+    setModalError("Коментар повинен містити щонайменше 3 символи.");        
+    return;
     }
-  };
+
+    try {
+        const res = await fetch(
+            `http://localhost:5000/api/reviews/${currentReview.ID}`,
+            {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rating: modalRating, comment: modalComment }),
+            }
+        );
+        if (res.status !== 200) throw new Error("Помилка при оновленні відгуку");
+        
+        setRefreshKey(prev => prev + 1);
+        setReviewModalOpen(false);
+        setCurrentReview(null);
+    } catch (err) {
+        console.error(err);
+        alert("Не вдалося оновити відгук.");
+    }
+};
 
   const deleteReviewModal = async () => {
     if (!confirm("Видалити відгук?")) return;
@@ -265,6 +278,11 @@ export default function Vinyls() {
   return (
     <div className="catalog-section">
       <h2>Вініли</h2>
+      {isDegraded && (
+      <div style={{ color: "white", backgroundColor: "red", padding: "10px", textAlign: "center", margin: "1rem 0" }}>
+        Увага! Сервіс перевантажено. Спробуйте пізніше.
+      </div>
+      )}
 
       <button className="add-vinyl-btn" onClick={() => handleOpenModal()}>Додати вініл</button>
 
@@ -306,7 +324,6 @@ export default function Vinyls() {
             </button>
           </div>
           
-          {/* Додати відгук (ОДНА, РОБОЧА ФОРМА) */}
           <form onSubmit={handleAddReview} className="review-form">
             <h4>Додати відгук:</h4>
             {postError && <p className="text-red-500">{postError}</p>}
@@ -315,6 +332,7 @@ export default function Vinyls() {
               placeholder="Ім'я користувача"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
+              disabled={isDegraded}
             />
             <input
               type="number"
@@ -322,16 +340,19 @@ export default function Vinyls() {
               max="5"
               value={rating}
               onChange={(e) => setRating(+e.target.value)}
+              disabled={isDegraded}
             />
             <input
               placeholder="Коментар (мін. 3 символи)"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
+              disabled={isDegraded}
             />
-            <button type="submit">Додати відгук</button>
-          </form>
+            <button type="submit" disabled={isDegraded || isSubmitting}>
+            {isSubmitting ? "Відправка..." : isDegraded ? "Тимчасово недоступно" : "Додати відгук"}
+            </button>
+</form>
 
-          {/* Відображення відгуків (ТЕПЕР БЕЗ ОБГОРТКИ, ПРОСТО СПИСОК) */}
           <div className="reviews">
             <h4>Відгуки:</h4>
             {reviews.length === 0 ? (
@@ -353,7 +374,6 @@ export default function Vinyls() {
         </div>
       )}
 
-      {/* Модалка вініл */}
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
@@ -409,7 +429,6 @@ export default function Vinyls() {
         </div>
       )}
 
-      {/* Модалка відгуків */}
       {reviewModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">

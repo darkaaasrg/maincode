@@ -2,52 +2,72 @@ import express from "express";
 import { db } from "../index.js";
 const router = express.Router();
 
-const handleNotFound = (res) => {
-    res.status(404).json({ error: "NotFound", code: "REVIEW_NOT_FOUND", details: [] });
+const idempotencyStore = new Map();
+
+const sendError = (res, req, message, httpStatus = 500, code = null, details = []) => {
+    console.error(`[${req.rid}] Error: ${message}`);
+    res.status(httpStatus).json({ error: message, code, details, requestId: req.rid });
 };
 
-const validateReview = (data) => {
-    const textContent = data.text || data.comment; 
-    const { user, productType, productId } = data;
-    
-    if (!user || !productType || !productId || !textContent || textContent.length < 3) {
-        return {
-            error: "ValidationError",
-            code: "EMPTY_REVIEW_OR_MISSING_FIELD",
-            details: [{ field: "comment", message: "Review comment must be at least 3 characters and all fields are required." }]
-        };
+router.post("/reviews", (req, res) => {
+    const key = req.get("Idempotency-Key");
+    if (!key) {
+        return sendError(res, req, "idempotency_key_required", 400);
     }
-    return null;
-};
+    if (idempotencyStore.has(key)) {
+        const stored = idempotencyStore.get(key);
+        return res.status(201).json({ ...stored, requestId: req.rid });
+    }
+
+    const { user, productType, productId, comment } = req.body;
+    if (!user || !productType || !productId || !comment || comment.length < 3) {
+        return sendError(res, req, "validation_error", 400, "EMPTY_REVIEW_OR_MISSING_FIELD");
+    }
+
+    const tableName = productType === 'vinyl' ? "ReviewsVinyls" : "ReviewsCassettes";
+    const productField = productType === 'vinyl' ? "vinyl_id" : "cassette_id";
+    const sql = `INSERT INTO ${tableName} (${productField}, userId, rating, comment, date, productType) VALUES (?, ?, ?, ?, NOW(), ?)`;
+    const params = [req.body.productId, req.body.user, req.body.rating || 5, req.body.comment, req.body.productType];
+
+    db.query(sql, params, (err, result) => {
+        if (err) {
+            return sendError(res, req, "db_error", 500);
+        }
+        const newReview = {
+            ID: result.insertId,
+            userId: req.body.user,
+            rating: req.body.rating || 5,
+            comment: req.body.comment,
+            product_type: req.body.productType,
+            productId: req.body.productId
+        };
+        idempotencyStore.set(key, newReview);
+        res.status(201).json({ ...newReview, requestId: req.rid });
+    });
+});
+
+router.get("/health", (req, res) => res.json({ status: "ok" }));
 
 router.get("/reviews", (req, res) => {
-    // Отримуємо параметри з URL: ?productType=...&productId=...
     const { productType, productId } = req.query;
 
-    // ПЕРЕВІРКА: Якщо параметри для фільтрації передані
     if (productType && productId) {
-        // Визначаємо, з якою таблицею та полем працювати
         const tableName = productType === 'vinyl' ? "ReviewsVinyls" : "ReviewsCassettes";
         const productField = productType === 'vinyl' ? "vinyl_id" : "cassette_id";
         
-        // Створюємо SQL-запит з умовою WHERE для фільтрації
         const sql = `
             SELECT ID, userId, rating, comment, date, '${productType}' as product_type, ${productField} as productId 
             FROM ${tableName} 
             WHERE ${productField} = ?`;
 
-        // Виконуємо запит з ID товару
         db.query(sql, [productId], (err, results) => {
             if (err) {
                 return res.status(500).json({ error: "DBError", message: "Query failed: " + err.message });
             }
-            // Повертаємо тільки відфільтровані відгуки
             res.status(200).json(results);
         });
 
     } else {
-        // ЯКЩО ПАРАМЕТРИ НЕ ПЕРЕДАНІ: залишаємо стару логіку (завантажити всі)
-        // Це корисно для адмін-панелі або інших випадків
         const sqlCassettes = "SELECT ID, userId, rating, comment, date, 'cassette' as product_type, cassette_id as productId FROM ReviewsCassettes";
         const sqlVinyls = "SELECT ID, userId, rating, comment, date, 'vinyl' as product_type, vinyl_id as productId FROM ReviewsVinyls";
         
@@ -76,7 +96,7 @@ router.post("/reviews", (req, res) => {
     
     const sql = `
     INSERT INTO ${tableName} (${productField}, userId, rating, comment, date, productType)
-    VALUES (?, ?, ?, ?, NOW(), ?)`; // <--- Додали ще один '?'
+    VALUES (?, ?, ?, ?, NOW(), ?)`;
 
     db.query(sql, [productId, user, rating || 5, finalComment, productType], (err, result) => {
         if (err) {
@@ -97,11 +117,34 @@ router.post("/reviews", (req, res) => {
 });
 
 router.put("/reviews/:id", (req, res) => {
-    const reviewId = req.params.id;
+const reviewId = req.params.id;
     const { rating, comment } = req.body; 
-    if (rating === undefined && comment === undefined) {
-         return res.status(400).json({ error: "BadRequest", message: "No data provided for update." });
+
+    // --- 👇 ДОДАНО ВАЛІДАЦІЮ ---
+    // Перевіряємо, чи передано поле коментаря, і якщо так, то чи валідне воно
+    if (comment !== undefined && comment.trim().length < 3) {
+        return sendError(res, req, "validation_error", 400, "INVALID_COMMENT_LENGTH", [
+            { field: "comment", message: "Review comment must be at least 3 characters." }
+        ]);
     }
+    // -------------------------
+
+    if (rating === undefined && comment === undefined) {
+       return sendError(res, req, "bad_request", 400, "NO_DATA_PROVIDED");
+    }
+
+    const fieldsToUpdate = [];
+    const values = [];
+
+    if (rating !== undefined) {
+        fieldsToUpdate.push("rating = ?");
+        values.push(rating);
+    }
+    if (comment !== undefined) {
+        fieldsToUpdate.push("comment = ?");
+        values.push(comment);
+    }
+    values.push(reviewId);
 
     const sqlUpdateCassette = "UPDATE ReviewsCassettes SET rating = ?, comment = ? WHERE ID = ?";
     const sqlUpdateVinyl = "UPDATE ReviewsVinyls SET rating = ?, comment = ? WHERE ID = ?";
