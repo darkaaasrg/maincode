@@ -1,19 +1,75 @@
 .header {
-    background-color: #222;
-    color: #fff;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .header nav a {
-    color: #fff;
-    text-decoration: none;
-    margin-left: 15px;
-  }
-  
-  .header nav a:hover {
-    text-decoration: underline;
-  }
-  
+  background-color: #222222; 
+  color: #ffffff; 
+  padding: 12px 25px; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  position: sticky;
+  top: 0;
+  z-index: 100; 
+}
+
+.header .logo-container {
+  display: flex; 
+  align-items: center; 
+  text-decoration: none; 
+  margin-right: 30px; 
+  color: #ffffff; 
+}
+
+.header .logo-img {
+  height: 50px;
+  width: auto;
+  margin-right: 15px; 
+}
+
+.header .logo-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+
+.header nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.header nav ul li {
+  margin-left: 20px;
+}
+
+.header nav a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease, border-bottom 0.3s ease;
+  padding: 5px 0;
+}
+
+.header nav a:hover {
+  color: #cccccc; 
+  border-bottom: 2px solid #ffffff;
+}
+
+.header nav button {
+  background: none;
+  border: 1px solid #ffffff; 
+  color: #ffffff;
+  padding: 8px 15px;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 4px; 
+  margin-left: 20px; 
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.header nav button:hover {
+  background-color: #444444; 
+  border-color: #cccccc; 
+}

@@ -1,0 +1,101 @@
+/* --- Контейнер форми --- */
+.auth-container {
+    max-width: 420px;
+    margin: 60px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+/* --- Заголовок --- */
+.auth-title {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    color: #333;
+    font-weight: 600;
+}
+
+/* --- Група (лейбл + інпут) --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+/* --- Поля вводу --- */
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box; /* Важливо для правильної ширини */
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #4a90e2; /* Підсвітка при фокусі */
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+/* --- Кнопка --- */
+.auth-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745; /* Приємний зелений */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.auth-button:hover {
+    background-color: #218838; /* Затемнення при наведенні */
+}
+
+/* --- Повідомлення про помилки/успіх --- */
+.error-message {
+    color: #dc3545; /* Червоний */
+    margin-bottom: 15px;
+    text-align: center;
+    background-color: rgba(220, 53, 69, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.success-message {
+    color: #28a745; /* Зелений */
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* --- Посилання внизу форми --- */
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.auth-footer a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}

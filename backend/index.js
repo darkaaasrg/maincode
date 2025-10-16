@@ -4,6 +4,7 @@ import cors from "cors";
 import { v4 as uuidv4 } from 'uuid';
 import productController from "./api/productController.js";
 import reviewController from "./api/reviewController.js";
+import authController from "./api/authController.js";
 
 const app = express();
 const PORT = 5000;
@@ -49,9 +50,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// 3. Middleware для імітації збоїв та затримок (для тестування)
 app.use(async (req, res, next) => {
-    // Ігноруємо для GET запитів, щоб не сповільнювати завантаження даних
     if (req.method === 'GET') {
         return next();
     }
@@ -66,10 +65,11 @@ app.use(async (req, res, next) => {
     }
     next();
 });
-
+    
 app.use("/api", productController); 
 app.use("/api", reviewController);
 app.use("/uploads", express.static("uploads")); 
+app.use("/api", authController);
 app.get("/", (req, res) => {
     res.send("API працює! Маршрути підключено.");
 });
