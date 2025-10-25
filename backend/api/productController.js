@@ -1,6 +1,11 @@
+// backend/api/ProductController.js
 import express from "express";
 import { db } from "../index.js"; 
+// === 1. КРИТИЧНО: ІМПОРТУЄМО MIDDLEWARE ===
+import { authenticateToken, authorizeAdmin } from "../middleware/authMiddleware.js"; 
+// ======================================
 const router = express.Router();
+
 /**
  * @param {string} entityType 
  * @returns {object}
@@ -10,6 +15,7 @@ const createCrudHandlers = (entityType) => {
     const idField = 'ID'; 
 
     return {
+        // ... (getAll, getById залишаються без змін) ...
         getAll: (req, res) => {
             db.query(`SELECT * FROM ${table}`, (err, results) => {
                 if (err) return res.status(500).json({ error: "DBError", message: err.message });
@@ -57,19 +63,31 @@ const createCrudHandlers = (entityType) => {
 
 const vinylHandlers = createCrudHandlers('Vinyls');
 const cassetteHandlers = createCrudHandlers('Cassettes');
+
 router.get("/health", (req, res) => {
     res.json({ status: "ok" });
 });
+
+// =========================================================
+// VINYLS ROUTES: GET доступні всім. POST/PUT/DELETE - ТІЛЬКИ АДМІНУ
+// =========================================================
 router.get("/vinyls", vinylHandlers.getAll);
 router.get("/vinyls/:id", vinylHandlers.getById);
-router.post("/vinyls", vinylHandlers.create);
-router.put("/vinyls/:id", vinylHandlers.update);
-router.delete("/vinyls/:id", vinylHandlers.delete);
 
+// 2. ЗАСТОСУВАННЯ ЗАХИСТУ:
+router.post("/vinyls", authenticateToken, authorizeAdmin, vinylHandlers.create);
+router.put("/vinyls/:id", authenticateToken, authorizeAdmin, vinylHandlers.update);
+router.delete("/vinyls/:id", authenticateToken, authorizeAdmin, vinylHandlers.delete);
+
+// =========================================================
+// CASSETTES ROUTES: GET доступні всім. POST/PUT/DELETE - ТІЛЬКИ АДМІНУ
+// =========================================================
 router.get("/cassettes", cassetteHandlers.getAll);
 router.get("/cassettes/:id", cassetteHandlers.getById);
-router.post("/cassettes", cassetteHandlers.create);
-router.put("/cassettes/:id", cassetteHandlers.update);
-router.delete("/cassettes/:id", cassetteHandlers.delete);
+
+// 2. ЗАСТОСУВАННЯ ЗАХИСТУ:
+router.post("/cassettes", authenticateToken, authorizeAdmin, cassetteHandlers.create);
+router.put("/cassettes/:id", authenticateToken, authorizeAdmin, cassetteHandlers.update);
+router.delete("/cassettes/:id", authenticateToken, authorizeAdmin, cassetteHandlers.delete);
 
 export default router;
