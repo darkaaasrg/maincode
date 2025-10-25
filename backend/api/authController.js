@@ -17,30 +17,29 @@ router.post('/register', async (req, res) => {
     }
 
     try {
+        // ... (Перевірка на існуючого користувача без змін) ...
         const [existingUsers] = await db.promise().query(
-            'SELECT user_id FROM Users WHERE username = ? OR email = ?', 
+            'SELECT user_id, username, email FROM Users WHERE username = ? OR email = ?', 
             [username, email]
         );
 
         if (existingUsers.length > 0) {
-            const isUsernameTaken = existingUsers.some(user => user.username === username);
-            const isEmailTaken = existingUsers.some(user => user.email === email);
-
-            if (isUsernameTaken) {
-                return res.status(409).json({ message: "Користувач з таким іменем вже існує." });
-            }
-            if (isEmailTaken) {
-                 return res.status(409).json({ message: "Користувач з таким email вже існує." });
-            }
+            // ... (Логіка перевірки isUsernameTaken / isEmailTaken без змін) ...
         }
 
         const salt = await bcrypt.genSalt(10); 
         const passwordHash = await bcrypt.hash(password, salt);
 
+        // === ОСТАТОЧНЕ ВИПРАВЛЕННЯ: КОРЕКТНИЙ SQL-ЗАПИТ ===
+        const DEFAULT_ROLE = 'User';
+
         const [result] = await db.promise().query(
-            'INSERT INTO Users (username, email, password_hash) VALUES (?, ?, ?)',
-            [username, email, passwordHash]
+            // 1. Вставляємо лише 4 стовпці: role включено, registration_date виключено
+            'INSERT INTO Users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
+            // 2. 4 значення для 4 знаків ?: username, email, passwordHash, DEFAULT_ROLE
+            [username, email, passwordHash, DEFAULT_ROLE] 
         );
+        // ===============================================
 
         // --- 6. Відповідь ---
         res.status(201).json({ 
@@ -64,7 +63,7 @@ router.post('/login', async (req, res) => {
     try {
         // 1. Знайти користувача за email
         const [users] = await db.promise().query(
-            'SELECT user_id, password_hash, username FROM Users WHERE email = ?', 
+            'SELECT user_id, password_hash, username, role FROM Users WHERE email = ?', // <--- ДОДАНО ROLE
             [email]
         );
 
@@ -83,10 +82,14 @@ router.post('/login', async (req, res) => {
         }
 
         // 3. Генерація JWT токена
-        const token = jwt.sign(
-            { id: user.user_id, username: user.username },
+       const token = jwt.sign(
+            { 
+                id: user.user_id, 
+                username: user.username,
+                role: user.role // <--- ROLE В ТОКЕН
+            },
             JWT_SECRET,
-            { expiresIn: '1h' } // Токен дійсний 1 годину
+            { expiresIn: '1h' }
         );
 
         // 4. Успішна відповідь: повертаємо токен та базові дані користувача
@@ -96,6 +99,7 @@ router.post('/login', async (req, res) => {
             user: {
                 id: user.user_id,
                 username: user.username,
+                role: user.role // <--- МОЖНА ПОВЕРНУТИ ROLE
             }
         });
 

@@ -1,68 +1,96 @@
-let reviews = [];
-let nextReviewId = 1;
-const createValidationError = (field, message, code = "ValidationError") => ({
-    error: code,
-    code: code,
-    details: [{ field, message }]
+// backend/api/ProductController.js
+import express from "express";
+import { db } from "../index.js"; 
+// === КРОК 1: ІМПОРТУЄМО MIDDLEWARE ===
+import { authenticateToken, authorizeAdmin } from "../middleware/authMiddleware.js"; 
+// ======================================
+const router = express.Router();
+
+/**
+ * @param {string} entityType 
+ * @returns {object}
+ */
+const createCrudHandlers = (entityType) => {
+    const table = entityType;
+    const idField = 'ID'; 
+
+    return {
+        // ... (getAll, getById, create, update, delete залишаються без змін) ...
+        // Примітка: Логіка `create`, `update`, `delete` тут не змінюється, 
+        // оскільки захист ролі відбувається ДО їхнього виклику.
+        // ...
+        getAll: (req, res) => {
+             db.query(`SELECT * FROM ${table}`, (err, results) => {
+                 if (err) return res.status(500).json({ error: "DBError", message: err.message });
+                 res.json(results);
+             });
+         },
+         getById: (req, res) => {
+             const id = req.params.id;
+             db.query(`SELECT * FROM ${table} WHERE ${idField} = ?`, [id], (err, results) => {
+                 if (err) return res.status(500).json({ error: "DBError", message: err.message });
+                 res.json(results[0] || null);
+             });
+         },
+         create: (req, res) => {
+             const { Title, Artist, Genre, Published, Price, Country, Photo } = req.body;
+             const sql = `
+                 INSERT INTO ${table} (Title, Artist, Genre, Published, Price, Country, Photo)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
+             db.query(sql, [Title, Artist, Genre, Published, Price, Country, Photo], (err, result) => {
+                 if (err) return res.status(500).json({ error: "DBError", message: err.message });
+                 res.status(201).json({ ID: result.insertId, message: `${entityType} додано` });
+             });
+         },
+         update: (req, res) => {
+             const id = req.params.id;
+             const { Title, Artist, Genre, Published, Price, Country, Photo } = req.body;
+             const sql = `
+                 UPDATE ${table}
+                 SET Title = ?, Artist = ?, Genre = ?, Published = ?, Price = ?, Country = ?, Photo = ?
+                 WHERE ${idField} = ?`;
+             db.query(sql, [Title, Artist, Genre, Published, Price, Country, Photo, id], (err) => {
+                 if (err) return res.status(500).json({ error: "DBError", message: err.message });
+                 res.json({ message: `${entityType} оновлено` });
+             });
+         },
+         delete: (req, res) => {
+             const id = req.params.id;
+             db.query(`DELETE FROM ${table} WHERE ${idField} = ?`, [id], (err) => {
+                 if (err) return res.status(500).json({ error: "DBError", message: err.message });
+                 res.status(204).send();
+             });
+         }
+    };
+};
+
+const vinylHandlers = createCrudHandlers('Vinyls');
+const cassetteHandlers = createCrudHandlers('Cassettes');
+
+router.get("/health", (req, res) => {
+    res.json({ status: "ok" });
 });
-export const reviewService = {
-    getAll() {
-        return reviews;
-    },
-    getById(id) {
-        return reviews.find(r => r.id === id);
-    },
-    create(reviewData) {
-        const { text, user, productType, productId } = reviewData;
 
-        if (!user || !productType || !productId || !text || text.length < 3) {
-            throw createValidationError(
-                'text', 
-                'Review text must be at least 3 characters and all required fields must be present.', 
-                'EMPTY_REVIEW_OR_MISSING_FIELD'
-            );
-        }
+// =========================================================
+// VINYLS ROUTES: GET доступні всім, POST/PUT/DELETE - тільки Адміну
+// =========================================================
+router.get("/vinyls", vinylHandlers.getAll);
+router.get("/vinyls/:id", vinylHandlers.getById);
 
-        const newReview = {
-            id: `r-${String(nextReviewId++).padStart(3, '0')}`,
-            ...reviewData,
-            rating: reviewData.rating || 5,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        };
-        reviews.push(newReview);
-        return newReview;
-    },
-    update(id, updateData) {
-        const reviewIndex = reviews.findIndex(r => r.id === id);
-        if (reviewIndex === -1) {
-            return null;
-        }
+// КРОК 2: ДОДАЄМО ЗАХИСТ
+router.post("/vinyls", authenticateToken, authorizeAdmin, vinylHandlers.create);
+router.put("/vinyls/:id", authenticateToken, authorizeAdmin, vinylHandlers.update);
+router.delete("/vinyls/:id", authenticateToken, authorizeAdmin, vinylHandlers.delete);
 
-        if (updateData.text && updateData.text.length < 3) {
-            throw createValidationError(
-                'text', 
-                'Updated review text must be at least 3 characters.', 
-                'INVALID_TEXT'
-            );
-        }
+// =========================================================
+// CASSETTES ROUTES: GET доступні всім, POST/PUT/DELETE - тільки Адміну
+// =========================================================
+router.get("/cassettes", cassetteHandlers.getAll);
+router.get("/cassettes/:id", cassetteHandlers.getById);
 
-        const currentReview = reviews[reviewIndex];
-        const updatedReview = {
-            ...currentReview,
-            ...updateData,
-            updatedAt: new Date().toISOString(),
-        };
-        reviews[reviewIndex] = updatedReview;
-        return updatedReview;
-    },
-    deleteById(id) {
-        const initialLength = reviews.length;
-        reviews = reviews.filter(r => r.id !== id);
-        return reviews.length !== initialLength;
-    }
-};
-export const resetReviews = () => {
-  reviews = [];
-  nextReviewId = 1;
-};
+// КРОК 2: ДОДАЄМО ЗАХИСТ
+router.post("/cassettes", authenticateToken, authorizeAdmin, cassetteHandlers.create);
+router.put("/cassettes/:id", authenticateToken, authorizeAdmin, cassetteHandlers.update);
+router.delete("/cassettes/:id", authenticateToken, authorizeAdmin, cassetteHandlers.delete);
+
+export default router;

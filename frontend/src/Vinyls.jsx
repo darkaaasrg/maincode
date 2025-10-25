@@ -142,87 +142,147 @@ export default function Vinyls() {
   };
 
   const handleSave = async () => {
-    try {
-      const method = selectedId ? "PUT" : "POST";
-      const url = selectedId
-        ? `http://localhost:5000/api/vinyls/${selectedId}`
-        : "http://localhost:5000/api/vinyls";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) throw new Error("Помилка при збереженні вінілу");
-
-      loadVinyls(); 
-      handleCloseModal();
-    } catch (err) {
-      console.error(err);
-      alert("Не вдалося зберегти вініл");
+    // 1. Отримуємо токен
+    const token = localStorage.getItem('authToken');
+    
+    // Якщо операція POST або PUT, потрібен токен
+    if (!token) {
+        alert("Помилка: Щоб додавати або редагувати товари, потрібно увійти як Адміністратор.");
+        return; 
     }
-  };
+
+    try {
+      const method = selectedId ? "PUT" : "POST";
+      const url = selectedId
+        ? `http://localhost:5000/api/vinyls/${selectedId}`
+        : "http://localhost:5000/api/vinyls";
+
+      const res = await fetch(url, {
+        method,
+        headers: { 
+            "Content-Type": "application/json",
+            // === КРИТИЧНО: ДОДАЄМО ЗАГОЛОВОК АВТОРИЗАЦІЇ ===
+            "Authorization": `Bearer ${token}` 
+            // ==============================================
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+           // Обробка помилки 403 Forbidden (Не Адмін)
+           if (res.status === 403) {
+               throw new Error("Недостатньо прав. Додавання/редагування доступне лише Адміністратору.");
+           }
+           throw new Error("Помилка при збереженні вінілу");
+        }
+
+      loadVinyls(); 
+      handleCloseModal();
+    } catch (err) {
+      console.error(err);
+      alert(`Не вдалося зберегти вініл. ${err.message}`);
+    }
+  };
 
   const handleDelete = async (id) => {
-    if (!confirm("Видалити цей вініл?")) return; 
-    try {
-      const res = await fetch(`http://localhost:5000/api/vinyls/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error("Помилка при видаленні");
-      setVinylList((prev) => prev.filter((v) => v.ID !== id));
-      setSelectedVinyl(null);
-      setSelectedId("");
-    } catch (err) {
-      console.error(err);
-      alert("Не вдалося видалити вініл");
+    // 1. Отримуємо токен
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        alert("Помилка: Щоб видалити товар, потрібно увійти як Адміністратор.");
+        return; 
     }
-  };
-  
-  const handleAddReview = async (e) => {
-        e.preventDefault();
-        setPostError("");
-        // if (!userId || !comment) {
-        //     return setPostError("Ім'я та коментар не можуть бути порожніми.");
-        // }
-        setIsSubmitting(true);
-        setPostError("");
-        const payload = {
-            user: userId,
-            rating,
-            comment,
-            productType: "vinyl",
-            productId: selectedVinyl.ID,
-        };
 
-        try {
-            const idemKey = getOrReuseKey(payload);
-            const res = await fetchWithResilience("http://localhost:5000/api/reviews", {
-                method: "POST",
-                body: JSON.stringify(payload),
-                idempotencyKey: idemKey,
-                retry: { retries: 3, baseDelayMs: 300, timeoutMs: 3500 },
-            });
+    if (!confirm("Видалити цей вініл?")) return; 
+    try {
+      const res = await fetch(`http://localhost:5000/api/vinyls/${id}`, {
+        method: "DELETE",
+        // === КРИТИЧНО: ДОДАЄМО ЗАГОЛОВОК АВТОРИЗАЦІЇ ===
+        headers: { "Authorization": `Bearer ${token}` }
+        // ==============================================
+      });
 
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || "Невідома помилка сервера");
-            }
+      if (!res.ok) {
+          if (res.status === 403) {
+               throw new Error("Недостатньо прав. Видалення доступне лише Адміністратору.");
+          }
+          throw new Error("Помилка при видаленні");
+       }
+       
+      setVinylList((prev) => prev.filter((v) => v.ID !== id));
+      setSelectedVinyl(null);
+      setSelectedId("");
+    } catch (err) {
+      console.error(err);
+      alert(`Не вдалося видалити вініл. ${err.message}`);
+    }
+  };
 
-            setFailureCount(0);
-            setRefreshKey(k => k + 1);
-            setUserId("");
-            setComment("");
-        } catch (error) {
-            console.error("Final error after retries:", error);
-            setPostError(`Помилка: ${error.message}`);
-            setFailureCount(c => c + 1); 
+ const handleAddReview = async (e) => {
+        e.preventDefault();
+        setPostError("");
+
+        // === КРОК 1: ОТРИМУЄМО ТОКЕН ===
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            setPostError("Помилка: Щоб залишити відгук, потрібно увійти в систему.");
+            return;
         }
-        finally {
-        setIsSubmitting(false);
-        }
-    };
+        // =================================
+
+        // if (!userId || !comment) {
+        //     return setPostError("Ім'я та коментар не можуть бути порожніми.");
+        // }
+        setIsSubmitting(true);
+        setPostError("");
+        
+        // Примітка: Оскільки ваш бекенд тепер бере userId з токена, 
+        // поле 'user' у payload більше не потрібне (або ігнорується).
+        // Ви можете видалити input для userId з форми, щоб уникнути плутанини.
+        const payload = {
+            // user: userId, // ЦЕ ПОЛЕ ТЕПЕР БЕРЕТЬСЯ З req.user.id НА БЕКЕНДІ
+            rating,
+            comment,
+            productType: "vinyl",
+            productId: selectedVinyl.ID,
+        };
+
+        try {
+            const idemKey = getOrReuseKey(payload);
+            
+            const headers = {
+                "Content-Type": "application/json",
+                // === КРОК 2: ДОДАЄМО ЗАГОЛОВОК АВТОРИЗАЦІЇ ===
+                "Authorization": `Bearer ${token}`, 
+                // ==============================================
+            };
+
+            const res = await fetchWithResilience("http://localhost:5000/api/reviews", {
+                method: "POST",
+                body: JSON.stringify(payload),
+                headers: headers, // <-- ПЕРЕДАЄМО НОВІ ЗАГОЛОВКИ
+                idempotencyKey: idemKey,
+                retry: { retries: 3, baseDelayMs: 300, timeoutMs: 3500 },
+            });
+
+            // ... (обробка res.ok та помилок) ...
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Невідома помилка сервера");
+            }
+
+            setFailureCount(0);
+            setRefreshKey(k => k + 1);
+            setUserId(""); // Очистити поле (хоча воно більше не використовується для відправки)
+            setComment("");
+        } catch (error) {
+            console.error("Final error after retries:", error);
+            setPostError(`Помилка: ${error.message}`);
+            setFailureCount(c => c + 1); 
+        }
+        finally {
+        setIsSubmitting(false);
+        }
+    };
   const openReviewModal = (review) => {
     setCurrentReview(review);
     setModalRating(review.rating);
@@ -231,10 +291,17 @@ export default function Vinyls() {
     setModalError("");
   };
 
- const saveReviewModal = async () => {
+const saveReviewModal = async () => {
+    // 1. Отримуємо токен
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        setModalError("Помилка: Увійдіть, щоб редагувати відгук.");
+        return;
+    }
+    
     if (modalComment.trim().length < 3) {
-    setModalError("Коментар повинен містити щонайменше 3 символи.");        
-    return;
+        setModalError("Коментар повинен містити щонайменше 3 символи.");        
+        return;
     }
 
     try {
@@ -242,38 +309,70 @@ export default function Vinyls() {
             `http://localhost:5000/api/reviews/${currentReview.ID}`,
             {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    // КРИТИЧНО: Додаємо токен
+                    "Authorization": `Bearer ${token}` 
+                },
                 body: JSON.stringify({ rating: modalRating, comment: modalComment }),
             }
         );
-        if (res.status !== 200) throw new Error("Помилка при оновленні відгуку");
         
+        if (res.status !== 200) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || "Помилка при оновленні відгуку");
+        }
+        
+        alert("Відгук успішно оновлено!"); // Додамо підтвердження
+
         setRefreshKey(prev => prev + 1);
         setReviewModalOpen(false);
         setCurrentReview(null);
     } catch (err) {
         console.error(err);
-        alert("Не вдалося оновити відгук.");
+        alert(`Не вдалося оновити відгук. ${err.message}`);
     }
 };
 
   const deleteReviewModal = async () => {
-    if (!confirm("Видалити відгук?")) return;
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/reviews/${currentReview.ID}`,
-        { method: "DELETE" }
-      );
-      
-      if (res.status !== 204) throw new Error("Помилка при видаленні відгуку");
-      setRefreshKey(prev => prev + 1);
-      setReviewModalOpen(false);
-      setCurrentReview(null);
-    } catch (err) {
-      console.error(err);
-      alert("Не вдалося видалити відгук.");
+    // 1. Отримуємо токен
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        alert("Помилка: Увійдіть, щоб видалити відгук.");
+        return;
     }
-  };
+
+    if (!confirm("Видалити відгук?")) return;
+    
+    try {
+        const res = await fetch(
+            `http://localhost:5000/api/reviews/${currentReview.ID}`,
+            { 
+                method: "DELETE",
+                // === КРИТИЧНО: ДОДАЄМО ЗАГОЛОВОК АВТОРИЗАЦІЇ ===
+                headers: {
+                    "Authorization": `Bearer ${token}` 
+                }
+                // ==============================================
+            }
+        );
+        
+        // Ваш бекенд повертає 204 No Content
+        if (res.status !== 204) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || "Помилка при видаленні відгуку");
+        }
+        
+        alert("Відгук успішно видалено!"); // Додамо підтвердження
+
+        setRefreshKey(prev => prev + 1);
+        setReviewModalOpen(false);
+        setCurrentReview(null);
+    } catch (err) {
+        console.error(err);
+        alert(`Не вдалося видалити відгук. ${err.message}`);
+    }
+};
 
   return (
     <div className="catalog-section">
@@ -329,12 +428,6 @@ export default function Vinyls() {
             {postError && <p className="text-red-500">{postError}</p>}
             
             <input
-              placeholder="Ім'я користувача"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              disabled={isDegraded}
-            />
-            <input
               type="number"
               min="1"
               max="5"
@@ -360,7 +453,7 @@ export default function Vinyls() {
             ) : (
                 reviews.map((r) => (
                     <div key={r.ID} className="review-item">
-                        <b className="v">{r.userId}</b>: {r.rating}★ — {r.comment}
+                        <b className="v">{r.username}</b>: {r.rating}★ — {r.comment}
                         <br />
                         <small className="v" >{new Date(r.date).toLocaleString()}</small>
                         <div className="review-buttons">
