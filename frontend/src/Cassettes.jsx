@@ -11,98 +11,98 @@ const API_URL = "http://localhost:5000/api/cassettes";
 const API_REVIEWS_URL = "http://localhost:5000/api/reviews";
 const API_UPLOADS_URL = "http://localhost:5000/uploads";
 
-// Функція для отримання токена
 const getToken = () => localStorage.getItem('authToken');
 
 export default function Cassettes() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [failureCount, setFailureCount] = useState(0);
-  const [isDegraded, setIsDegraded] = useState(false);
-  const [cassetteList, setCassetteList] = useState([]); // Змінено: vinylList -> cassetteList
-  const [selectedId, setSelectedId] = useState("");
-  const [selectedCassette, setSelectedCassette] = useState(null); // Змінено: selectedVinyl -> selectedCassette
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [modalError, setModalError] = useState("");
+const [isSubmitting, setIsSubmitting] = useState(false);
+const [failureCount, setFailureCount] = useState(0);
+const [isDegraded, setIsDegraded] = useState(false);
+const [cassetteList, setCassetteList] = useState([]); // Змінено: vinylList -> cassetteList
+const [selectedId, setSelectedId] = useState("");
+const [selectedCassette, setSelectedCassette] = useState(null); // Змінено: selectedVinyl -> selectedCassette
+const [refreshKey, setRefreshKey] = useState(0);
+const [modalError, setModalError] = useState("");
 
-  const [postError, setPostError] = useState(""); 
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
-  const [reviews, setReviews] = useState([]);
+const [postError, setPostError] = useState(""); 
+const [rating, setRating] = useState(5);
+const [comment, setComment] = useState("");
+const [reviews, setReviews] = useState([]);
 
-  const [formData, setFormData] = useState({
-    Title: "",
-    Artist: "",
-    Genre: "",
-    Country: "",
-    Published: "",
-    Price: "",
-    Photo: "",
-  });
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const [formData, setFormData] = useState({
+Title: "",
+Artist: "",
+Genre: "",
+Country: "",
+Published: "",
+Price: "",
+Photo: "",
+});
+const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [reviewModalOpen, setReviewModalOpen] = useState(false);
-  const [currentReview, setCurrentReview] = useState(null);
-  const [modalRating, setModalRating] = useState(5);
-  const [modalComment, setModalComment] = useState("");
+const [reviewModalOpen, setReviewModalOpen] = useState(false);
+const [currentReview, setCurrentReview] = useState(null);
+const [modalRating, setModalRating] = useState(5);
+const [modalComment, setModalComment] = useState("");
 
-  const loadCassettes = () => { // Змінено
-    fetch(API_URL)
-    .then((res) => res.json())
-    .then((data) => {
-      if (Array.isArray(data)) {
-        setCassetteList(data); // Змінено
-      } else {
-        console.error("Отримано невірний формат даних для касет:", data); // Змінено
-        setCassetteList([]); // Змінено
-      }
-    })
-    .catch((err) => {
-        console.error("Помилка при завантаженні касет:", err); // Змінено
-        setCassetteList([]); // Змінено
-    });
+const loadCassettes = () => { 
+fetch(API_URL)
+.then((res) => res.json())
+.then((data) => {
+if (Array.isArray(data)) {
+setCassetteList(data); 
+} 
+else {
+console.error("Отримано невірний формат даних для касет:", data); // Змінено
+ setCassetteList([]); 
+ }
+})
+.catch((err) => {
+console.error("Помилка при завантаженні касет:", err); // Змінено
+ setCassetteList([]); 
+ });
   };
 
- const loadReviews = (id) => {
-    // Змінено: productType=vinyl -> productType=cassette
-    const url = `${API_REVIEWS_URL}?productType=${ENTITY_TYPE}&productId=${id}`;
+const loadReviews = (id) => {
+const url = `${API_REVIEWS_URL}?productType=${ENTITY_TYPE}&productId=${id}`;
 
-    fetch(url)
-        .then((res) => res.json())
-        .then((filteredData) => {
-            const sortedReviews = filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
-            setReviews(sortedReviews);
-        })
-        .catch((err) => console.error("Помилка завантаження відгуків:", err));
+fetch(url)
+.then((res) => res.json())
+.then((filteredData) => {
+const sortedReviews = filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+setReviews(sortedReviews);
+})
+.catch((err) => console.error("Помилка завантаження відгуків:", err));
   };
 
-  useEffect(() => {
-    loadCassettes(); // Змінено
-  }, []);
+useEffect(() => {
+loadCassettes(); 
+ }, []);
 
-  useEffect(() => {
-      if (selectedId) {
-          loadReviews(selectedId);
-      }
-  }, [selectedId, refreshKey]); 
-  
-  useEffect(() => {
-      if (failureCount >= 3) {
-          setIsDegraded(true);
-          const timer = setTimeout(() => {
-              setIsDegraded(false);
-              setFailureCount(0);
-          }, 30000);
-          return () => clearTimeout(timer);
-      }
-    }, [failureCount]);
+ useEffect(() => {
+if (selectedId) {
+loadReviews(selectedId);
+ }
+ }, [selectedId, refreshKey]); 
 
-  const handleSelectChange = (e) => {
-    const id = e.target.value;
-    setSelectedId(id);
-    const found = cassetteList.find((c) => c.ID.toString() === id); // Змінено
-    setSelectedCassette(found); // Змінено
-    setRefreshKey(prev => prev + 1);
-  };
+ useEffect(() => {
+ if (failureCount >= 3) {
+
+  setIsDegraded(true);
+const timer = setTimeout(() => {
+setIsDegraded(false);
+setFailureCount(0);
+ }, 30000);
+return () => clearTimeout(timer);
+}
+ }, [failureCount]);
+
+const handleSelectChange = (e) => {
+const id = e.target.value;
+setSelectedId(id);
+ const found = cassetteList.find((c) => c.ID.toString() === id); // Змінено
+ setSelectedCassette(found); // Змінено
+ setRefreshKey(prev => prev + 1);
+ };
 
   const handleOpenModal = (cassette = null) => { // Змінено
     if (cassette) { // Змінено
@@ -535,9 +535,9 @@ const saveReviewModal = async () => {
               onChange={(e) => setModalComment(e.target.value)}
             />
             <div className="modal-buttons">
-              <button onClick={saveReviewModal}>Зберегти</button>
-              <button onClick={deleteReviewModal}>Видалити</button>
-              <button onClick={() => setReviewModalOpen(false)}>Відмінити</button>
+              <button className="first-child" onClick={saveReviewModal}>Зберегти</button>
+              <button className= "delete-btn"onClick={deleteReviewModal}>Видалити</button>
+              <button className = "last-child"onClick={() => setReviewModalOpen(false)}>Відмінити</button>
             </div>
           </div>
         </div>

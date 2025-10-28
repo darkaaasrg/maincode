@@ -34,14 +34,10 @@ router.post('/register', async (req, res) => {
         const DEFAULT_ROLE = 'User';
 
         const [result] = await db.promise().query(
-            // 1. Вставляємо лише 4 стовпці: role включено, registration_date виключено
             'INSERT INTO Users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
-            // 2. 4 значення для 4 знаків ?: username, email, passwordHash, DEFAULT_ROLE
             [username, email, passwordHash, DEFAULT_ROLE] 
         );
-        // ===============================================
-
-        // --- 6. Відповідь ---
+       
         res.status(201).json({ 
             message: "Реєстрація успішна! Ласкаво просимо.",
             userId: result.insertId 
@@ -61,38 +57,30 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-        // 1. Знайти користувача за email
         const [users] = await db.promise().query(
             'SELECT user_id, password_hash, username, role FROM Users WHERE email = ?', // <--- ДОДАНО ROLE
             [email]
         );
 
         const user = users[0];
-
-        // Перевірка існування користувача
         if (!user) {
             return res.status(401).json({ message: "Невірний email або пароль." });
         }
-
-        // 2. Порівняння хешованого пароля
         const isMatch = await bcrypt.compare(password, user.password_hash);
 
         if (!isMatch) {
             return res.status(401).json({ message: "Невірний email або пароль." });
         }
-
-        // 3. Генерація JWT токена
        const token = jwt.sign(
             { 
                 id: user.user_id, 
                 username: user.username,
-                role: user.role // <--- ROLE В ТОКЕН
+                role: user.role 
             },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
 
-        // 4. Успішна відповідь: повертаємо токен та базові дані користувача
         res.status(200).json({
             message: "Вхід успішний.",
             token,
