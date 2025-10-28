@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ./backend 
+      dockerfile: Dockerfile
+    container_name: music_catalog_api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      DB_URL: mysql://stasnya:Aa20061095!@26.210.121.124:3306/music_catalog
+      JWT_SECRET: YOUR_SUPER_SECRET_KEY_FOR_JWT
+
+  web:
+    build:
+      context: ./frontend 
+      dockerfile: Dockerfile
+    container_name: music_catalog_web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "5173:80" 
+    environment:
+      REACT_APP_API_BASE_URL: "http://localhost:5000/api"
+    

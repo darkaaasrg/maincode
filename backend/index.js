@@ -50,21 +50,21 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(async (req, res, next) => {
-    if (req.method === 'GET') {
-        return next();
-    }
-    const r = Math.random();
-    // 15% шанс на довгу затримку
-    if (r < 0.15) await new Promise(r => setTimeout(r, 1200 + Math.random() * 800));
-    // 20% шанс на помилку 5xx
-    if (r > 0.80) {
-        const err = Math.random() < 0.5 ? "unavailable" : "unexpected";
-        const code = err === "unavailable" ? 503 : 500;
-        return res.status(code).json({ error: err, requestId: req.rid });
-    }
-    next();
-});
+// app.use(async (req, res, next) => {
+//     if (req.method === 'GET') {
+//         return next();
+//     }
+//     const r = Math.random();
+//     // 15% шанс на довгу затримку
+//     if (r < 0.15) await new Promise(r => setTimeout(r, 1200 + Math.random() * 800));
+//     // 20% шанс на помилку 5xx
+//     if (r > 0.80) {
+//         const err = Math.random() < 0.5 ? "unavailable" : "unexpected";
+//         const code = err === "unavailable" ? 503 : 500;
+//         return res.status(code).json({ error: err, requestId: req.rid });
+//     }
+//     next();
+// });
     
 app.use("/api", productController); 
 app.use("/api", reviewController);
