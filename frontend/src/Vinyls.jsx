@@ -292,7 +292,6 @@ export default function Vinyls() {
   };
 
 const saveReviewModal = async () => {
-    // 1. Отримуємо токен
     const token = localStorage.getItem('authToken');
     if (!token) {
         setModalError("Помилка: Увійдіть, щоб редагувати відгук.");
@@ -538,9 +537,9 @@ const saveReviewModal = async () => {
               onChange={(e) => setModalComment(e.target.value)}
             />
             <div className="modal-buttons">
-              <button onClick={saveReviewModal}>Зберегти</button>
-              <button onClick={deleteReviewModal}>Видалити</button>
-              <button onClick={() => setReviewModalOpen(false)}>Відмінити</button>
+              <button className="first-child" onClick={saveReviewModal}>Зберегти</button>
+              <button className = "delete-btn" onClick={deleteReviewModal}>Видалити</button>
+              <button className = "last-child" onClick={() => setReviewModalOpen(false)}>Відмінити</button>
             </div>
           </div>
         </div>

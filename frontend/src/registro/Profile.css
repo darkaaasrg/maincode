@@ -1,0 +1,53 @@
+/* frontend/src/profile/Profile.css */
+.profile-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #2e2e2e; 
+    color: #f0f0f0; 
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.profile-title {
+    text-align: center;
+    color: #4CAF50; /* Зелений акцент */
+    margin-bottom: 30px;
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: row; /* Розміщуємо фото та інфо горизонтально */
+    gap: 40px;
+}
+
+.profile-photo-section {
+    flex-shrink: 0; /* Щоб секція фото не стискалася */
+    text-align: center;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #4CAF50; 
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+    margin-bottom: 15px;
+}
+
+.profile-info-section {
+    flex-grow: 1;
+}
+
+/* Стилі для кнопок, форм та повідомлень як у попередній відповіді */
+/* ... (додайте стилі для кнопок, форм, повідомлень) ... */
+
+@media (max-width: 600px) {
+    .profile-details {
+        flex-direction: column;
+        align-items: center;
+    }
+}

@@ -7,6 +7,7 @@
   import Footer from "./components/Footer";
   import Register from './registro/Register';
   import Login from './registro/LoginPage';
+  import Profile from './registro/Profile';
   import './index.css'
 
   function App() {
@@ -20,6 +21,9 @@
               <Route path="/" element={<Home />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
+
+            <Route path="/profile" element={<Profile />} />
+
               <Route path="/vinyls" element={<Vinyls />} />
               <Route path="/cassettes" element={<Cassettes />} />
             </Routes>
