@@ -9,7 +9,7 @@ import authController from "./api/authController.js";
 import profileController from "./api/profileController.js"; // Впевнені, що файл існує
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // Видаляємо дублювання middleware
 app.use(cors());
@@ -19,7 +19,8 @@ app.use(cors({
 }));
 // Примітка: app.use(express.json()) можна залишити лише один раз
 
-export const db = mysql.createPool({
+export const db = mysql.createPool(
+    process.env.DB_URL ||{
     connectionLimit: 10,
     waitForConnections: true,
     queueLimit: 0,
@@ -43,6 +44,9 @@ app.use((req, res, next) => {
 
 // Middleware для Rate Limiting
 app.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'test') {
+        return next();
+    }
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "local";
     const b = rate.get(ip) ?? { count: 0, ts: now() };
     const within = now() - b.ts < WINDOW_MS;
@@ -82,3 +86,11 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(`Сервер запущено на http://localhost:${PORT}`);
 });
+export default app;
+
+// 2. Запускаємо сервер ТІЛЬКИ якщо файл не імпортовано (тобто не в тестах)
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`Сервер запущено на http://localhost:${PORT}`);
+    });
+}
