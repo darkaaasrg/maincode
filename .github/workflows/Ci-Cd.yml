@@ -1,18 +1,18 @@
-name: Ci-Cd
+name: 100 - Advanced CI-CD (All Services)
 
 on:
   push:
     branches:
-      - '**'
+      - '**' # Запускати на push у будь-яку гілку
     tags:
       - 'v*.*.*'
   pull_request:
 
 permissions:
   contents: read      
-  packages: write    
+  packages: write     
   actions: read       
-  id-token: write    
+  id-token: write     
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,7 +27,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: yourpassword 
-          MYSQL_DATABASE: test_db       
+          MYSQL_DATABASE: test_db      
         ports:
           - 3306:3306
         options: >-
@@ -55,15 +55,22 @@ jobs:
         run: node --experimental-vm-modules node_modules/jest/bin/jest --detectOpenHandles --runInBand
         working-directory: ./backend
         env:
+          # --- КЛЮЧОВЕ ВИПРАВЛЕННЯ ТУТ ---
+          NODE_ENV: 'test' # <--- Це зупинить 'app.listen()'
+          # ---
           DB_URL: mysql://root:yourpassword@localhost:3306/test_db
           JWT_SECRET: test_secret_key
 
+  # ... (задачі deliver-backend та deliver-frontend залишаються без змін) ...
   deliver-backend:
     runs-on: ubuntu-latest
     needs: build-and-test
+    # Запускати, ТІЛЬКИ якщо це push у 'main' АБО 'v*' тег
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+      github.event_name == 'push' && (
+        github.ref == 'refs/heads/main' ||
+        startsWith(github.ref, 'refs/tags/v')
+      )
     
     steps:
       - name: Checkout repository
@@ -80,12 +87,10 @@ jobs:
         id: meta-backend
         uses: docker/metadata-action@v5
         with:
-
           images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-backend
           tags: |
             type=semver,pattern={{version}} 
             type=sha,prefix=sha-
-            # 'latest' для гілки 'main'
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and scan backend image
@@ -97,7 +102,7 @@ jobs:
           load: true
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
-      
+          
       - name: Scan backend image with Trivy
         uses: aquasecurity/trivy-action@v0.24.0
         with:
@@ -120,10 +125,13 @@ jobs:
   deliver-frontend:
     runs-on: ubuntu-latest
     needs: build-and-test
+    # Запускати, ТІЛЬКИ якщо це push у 'main' АБО 'v*' тег
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
-      
+      github.event_name == 'push' && (
+        github.ref == 'refs/heads/main' ||
+        startsWith(github.ref, 'refs/tags/v')
+      )
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
