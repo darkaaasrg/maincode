@@ -31,7 +31,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd "mysqladmin ping -h localhost -p${{ env.MYSQL_ROOT_PASSWORD }} -u root"
+          --health-cmd "mysqladmin ping -h localhost -pyourpassword -u root"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -81,8 +81,8 @@ jobs:
 
           images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-backend
           tags: |
-            type=semver,pattern={{version}} # Для тегів v1.2.3
-            type=sha,prefix=sha-           # Для sha-a1b2c3d4
+            type=semver,pattern={{version}} 
+            type=sha,prefix=sha-
             # 'latest' для гілки 'main'
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
