@@ -7,6 +7,8 @@ on:
     tags:
       - 'v*.*.*'
   pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read      
@@ -21,7 +23,7 @@ concurrency:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    
     services:
       mysql:
         image: mysql:8.0
@@ -52,20 +54,18 @@ jobs:
         working-directory: ./backend
 
       - name: Run backend tests
-        run: node --experimental-vm-modules node_modules/jest/bin/jest --detectOpenHandles --runInBand
-        working-directory: ./backend
         env:
           NODE_ENV: 'test'
-          DB_URL: mysql://root:yourpassword@localhost:3306/test_db
-          JWT_SECRET: test_secret_key
+          DB_URL: 'mysql://root:yourpassword@localhost:3306/test_db'
+          JWT_SECRET: 'test_secret_key'
+        run: |
+          node --experimental-vm-modules node_modules/jest/bin/jest --detectOpenHandles --runInBand
+        working-directory: ./backend
+
   deliver-backend:
     runs-on: ubuntu-latest
     needs: build-and-test
-    if: |
-      github.event_name == 'push' && (
-        github.ref == 'refs/heads/main' ||
-        startsWith(github.ref, 'refs/tags/v')
-      )
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     
     steps:
       - name: Checkout repository
@@ -97,11 +97,13 @@ jobs:
           load: true
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
-          
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
       - name: Scan backend image with Trivy
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.30.0 
         with:
-          image-ref: ${{ steps.meta-backend.outputs.tags }}
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-backend:latest'
           format: 'table'
           exit-code: '0'
           ignore-unfixed: true
@@ -116,15 +118,12 @@ jobs:
           push: true
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
 
   deliver-frontend:
     runs-on: ubuntu-latest
     needs: build-and-test
-    if: |
-      github.event_name == 'push' && (
-        github.ref == 'refs/heads/main' ||
-        startsWith(github.ref, 'refs/tags/v')
-      )
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     
     steps:
       - name: Checkout repository
@@ -155,3 +154,5 @@ jobs:
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
