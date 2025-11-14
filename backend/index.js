@@ -18,8 +18,8 @@ app.use(cors({
 }));
 
 const dbUrl = process.env.NODE_ENV === 'test' 
-    ? process.env.DB_URL 
-    : "mysql://stasnya:Aa20061095!@26.210.121.124:3306/music_catalog";
+    ? (process.env.DB_URL || 'mysql://root:yourpassword@localhost:3306/test_db') 
+    : "mysql://stasnya:Aa20061095!@26.210.121.124:3306/music_catalog"; 
 
 export const db = mysql.createPool({
     connectionLimit: 10,
