@@ -19,7 +19,7 @@ class Review {
   }
   
   class Product {
-    constructor(id, title, artist, genre, year, tracks, format, inStock) {
+    constructor(id, title, artist, genre, year, tracks, format, inStock, image) {
       this.id = id;
       this.title = title;
       this.artist = artist;
@@ -28,6 +28,7 @@ class Review {
       this.tracks = tracks;
       this.format = format;
       this.inStock = inStock;
+      this.image = image;
       this.reviews = [];
     }
   
