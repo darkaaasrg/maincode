@@ -62,6 +62,8 @@ app.get("/", (req, res) => {
     res.send("API працює! Маршрути підключено.");
 });
 
+export default app;
+
 if (process.env.NODE_ENV !== 'test') {
     app.listen(PORT, () => {
         console.log(`Сервер запущено на http://localhost:${PORT}`);
