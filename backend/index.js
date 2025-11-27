@@ -30,7 +30,7 @@ export const db = mysql.createPool({
 });
 
 const rate = new Map();
-const WINDOW_MS = 10_000, MAX_REQ = 5;
+const WINDOW_MS = 10_000, MAX_REQ = 50;
 const now = () => Date.now();
 
 app.use((req, res, next) => {

@@ -1,61 +1,89 @@
-/* ProductCard.css */
+/* src/components/ProductCard.css */
+
 .product-card {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin: 10px;
-    border-radius: 8px;
-    width: 250px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Займає всю ширину .post-wrapper */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  
+  /* Стиль Vinyla: білий фон, тонка рамка, без тіней */
+  background-color: #fff;
+  border: 1px solid #e1e1e1;
+  border-radius: 0; /* Квадратні кути */
+  padding: 15px;
+  box-shadow: none;
+  transition: border-color 0.3s ease;
+}
+
+.product-card:hover {
+  border-color: #000; /* Чорна рамка при наведенні */
+}
+
+/* Контейнер зображення */
+.product-image-container {
+  width: 100%;
+  height: 200px; /* Фіксована висота для зображень */
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #fff;
 }
 
 .product-image-container img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-    margin-bottom: 10px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Зображення не обрізається */
+  border-radius: 0;
 }
 
+/* Інформація про товар */
+.product-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  text-align: left; /* Текст зліва */
+}
+
+.product-info h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.product-info p {
+  font-size: 14px;
+  color: #555;
+  margin: 0 0 10px 0;
+}
+
+.short-desc {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.4;
+  margin-bottom: 15px;
+  flex-grow: 1;
+}
+
+/* Кнопка */
 .view-btn {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    margin-top: 10px;
-    cursor: pointer;
-    border-radius: 4px;
+  background-color: #000; /* Чорна кнопка */
+  color: #fff;
+  border: 1px solid #000;
+  padding: 10px;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
 }
 
-/* Додайте до ProductDetails.css або загального файлу стилів */
-
-.image-slider-container {
-    position: relative;
-    width: 300px; /* Або інший розмір, який вам потрібен */
-    margin: 0 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.details-image {
-    max-width: 100%;
-    height: auto;
-    border-radius: 6px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.slider-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-top: 10px;
-}
-
-.slider-controls button {
-    padding: 5px 10px;
-    cursor: pointer;
+.view-btn:hover {
+  background-color: #fff;
+  color: #000;
 }

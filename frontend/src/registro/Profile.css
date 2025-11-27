@@ -1,202 +1,209 @@
-/* frontend/src/profile/Profile.css */
+/* src/registro/Profile.css */
 
-/* --- ОСНОВНИЙ КОНТЕЙНЕР --- */
+.profile-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background-color: #f7f5ef;
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.profile-header h1 {
+  font-size: 32px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0;
+  color: #000;
+}
+
 .profile-container {
-    /* ЗАБРАНО: max-width: 900px; */
-    width: 90%; /* Обмежимо ширину, щоб не прилипало до країв на великих екранах, але не жорстко */
-    margin: 40px auto;
-    padding: 30px 40px;
-    background-color: #ffffff; /* Світлий фон */
-    color: #333333; /* Темний текст */
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Легка тінь */
+  display: flex;
+  gap: 30px;
 }
 
-/* --- ЗАГОЛОВКИ --- */
-.profile-title {
-    text-align: center;
-    color: #007bff; /* Синій акцент (стандартний) */
-    margin-bottom: 30px;
-    font-size: 2.2rem;
-    font-weight: 600;
-    border-bottom: 2px solid #eeeeee;
-    padding-bottom: 15px;
+/* ЛІВА КОЛОНКА */
+.profile-card {
+  flex: 1;
+  background-color: #fff;
+  border: 1px solid #e1e1e1;
+  padding: 30px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
 }
 
-/* --- РОЗДІЛЕННЯ ФОТО ТА ДЕТАЛЕЙ --- */
-.profile-details {
-    display: flex;
-    flex-direction: row;
-    gap: 50px;
-    align-items: flex-start; /* Вирівнювання по верхньому краю */
+/* --- СТИЛІ АВАТАРА --- */
+.profile-avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee; /* Відділяємо лінією від даних */
 }
 
-/* --- СЕКЦІЯ ФОТО --- */
-.profile-photo-section {
-    flex-shrink: 0;
-    text-align: center;
-    padding: 20px;
-    border-right: 1px solid #e0e0e0;
+.avatar-wrapper {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%; /* Круглий аватар */
+  overflow: hidden;
+  border: 2px solid #e1e1e1;
+  background-color: #f9f9f9;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .profile-avatar {
-    width: 150px; /* Збільшимо розмір для кращого вигляду */
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid #007bff; /* Синя рамка */
-    box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
-    margin-bottom: 15px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* --- ІНФОРМАЦІЙНА СЕКЦІЯ --- */
-.profile-info-section {
-    flex-grow: 1;
-    padding-top: 20px;
+.change-photo-btn {
+  font-size: 13px;
+  color: #000;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
+.change-photo-btn:hover {
+  color: #666;
 }
 
-.profile-info-section h3, .profile-basket-idea h3 {
-    color: #333333;
-    margin-bottom: 15px;
-    font-weight: 500;
+/* Інші стилі */
+.profile-card h2 {
+  font-size: 18px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-weight: 700;
+  text-align: left;
 }
 
-.profile-info-section p, .profile-basket-idea p {
-    margin-bottom: 8px;
-    font-size: 1rem;
+.profile-info-group {
+  margin-bottom: 20px;
 }
 
-.profile-info-section strong {
-    font-weight: 600;
+.profile-info-group label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-/* --- ФОРМА ОНОВЛЕННЯ ЛОГІНА --- */
-.profile-form {
-    margin-top: 25px;
-    padding-top: 15px;
-    border-top: 1px solid #e0e0e0;
+.profile-info-group p {
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.profile-form label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #555;
+.profile-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 0;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
 }
 
-.profile-form input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+.profile-input:focus {
+  outline: none;
+  border-color: #000;
+  background-color: #fff;
 }
 
-/* --- СЕКЦІЯ КОШИКА --- */
-.profile-basket-idea {
-    margin-top: 30px;
-    padding-top: 30px;
-    border-top: 1px solid #e0e0e0;
+.profile-actions {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-/* --- ПОВІДОМЛЕННЯ ТА ЗАВАНТАЖЕННЯ --- */
-.profile-message {
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-    text-align: center;
-    font-weight: 500;
+.btn-black {
+  background-color: #000;
+  color: #fff;
+  border: 1px solid #000;
+  padding: 12px;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s;
 }
 
-.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+.btn-black:hover {
+  background-color: #333;
 }
 
-.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+.btn-outline {
+  background-color: transparent;
+  color: #000;
+  border: 1px solid #000;
+  padding: 12px;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s;
 }
 
-.profile-loading, .profile-error-inline {
-    text-align: center;
-    padding: 50px;
-    font-size: 1.2rem;
-    color: #555;
+.btn-outline:hover {
+  background-color: #f0f0f0;
 }
 
-
-/* --- СТИЛІ КНОПОК --- */
-.btn-primary, .btn-secondary, .btn-small {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s, box-shadow 0.2s;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
+.btn-logout {
+  margin-top: 20px;
+  background-color: #fff;
+  color: #d9534f;
+  border: 1px solid #d9534f;
 }
 
-.btn-primary {
-    background-color: #007bff;
-    color: white;
+.btn-logout:hover {
+  background-color: #d9534f;
+  color: #fff;
 }
 
-.btn-primary:hover {
-    background-color: #0056b3;
+.orders-section {
+  flex: 2;
+  background-color: #fff;
+  border: 1px solid #e1e1e1;
+  padding: 30px;
+  min-height: 400px;
 }
 
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
+.orders-section h2 {
+  font-size: 18px;
+  text-transform: uppercase;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
 }
 
-.btn-secondary:hover {
-    background-color: #5a6268;
+.empty-orders {
+  text-align: center;
+  color: #888;
+  margin-top: 50px;
 }
 
-.btn-small {
-    padding: 8px 12px;
-    background-color: #28a745; /* Зелений для зміни фото */
-    color: white;
-    font-size: 0.9rem;
-}
-
-.btn-small:hover {
-    background-color: #1e7e34;
-}
-
-.disabled-btn {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* --- АДАПТИВНІСТЬ --- */
 @media (max-width: 768px) {
-    .profile-container {
-        width: 95%;
-        padding: 20px;
-    }
-    .profile-details {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-    .profile-photo-section {
-        border-right: none;
-        border-bottom: 1px solid #e0e0e0;
-        padding-bottom: 20px;
-    }
-    .profile-info-section {
-        padding-top: 0;
-        text-align: center; /* Центруємо інфо на мобільних */
-    }
-    .profile-form {
-        text-align: left; /* Форму лишаємо зліва */
-    }
+  .profile-container {
+    flex-direction: column;
+  }
 }
