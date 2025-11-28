@@ -1,37 +1,44 @@
+/* src/components/Header.css */
+
 .header {
-  background-color: #222222; 
-  color: #ffffff; 
-  padding: 12px 25px; 
+  background-color: #f7f5ef;
+  color: #000;
+  /* Зменшили вертикальний відступ з 15px до 10px */
+  padding: 10px 40px; 
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid #e1e1e1;
   position: sticky;
   top: 0;
-  z-index: 100; 
+  z-index: 100;
+  /* Можна задати фіксовану висоту, якщо треба, але padding краще */
 }
 
 .header .logo-container {
-  display: flex; 
-  align-items: center; 
-  text-decoration: none; 
-  margin-right: 30px; 
-  color: #ffffff; 
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #000;
 }
 
 .header .logo-img {
-  height: 50px;
+  /* ЗМЕНШИЛИ ЛОГОТИП: було 50px, стало 30px */
+  height: 30px; 
   width: auto;
-  margin-right: 15px; 
+  margin-right: 10px;
 }
 
 .header .logo-text {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #ffffff;
+  /* Трохи зменшили шрифт тексту логотипу */
+  font-size: 1.1rem; 
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #000;
+  letter-spacing: 1px;
 }
 
-
+/* Навігація */
 .header nav ul {
   list-style: none;
   padding: 0;
@@ -41,35 +48,38 @@
 }
 
 .header nav ul li {
-  margin-left: 20px;
+  margin-left: 25px; /* Трохи компактніше */
 }
 
 .header nav a {
-  color: #ffffff;
+  color: #000;
   text-decoration: none;
-  font-size: 1rem;
-  transition: color 0.3s ease, border-bottom 0.3s ease;
+  font-size: 13px; /* Трохи менший шрифт меню */
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
   padding: 5px 0;
 }
 
 .header nav a:hover {
-  color: #cccccc; 
-  border-bottom: 2px solid #ffffff;
+  color: #666;
 }
 
 .header nav button {
-  background: none;
-  border: 1px solid #ffffff; 
-  color: #ffffff;
-  padding: 8px 15px;
+  background: transparent;
+  border: 1px solid #000;
+  color: #000;
+  padding: 6px 15px; /* Зменшили кнопку */
   cursor: pointer;
-  font-size: 1rem;
-  border-radius: 4px; 
-  margin-left: 20px; 
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 0;
+  margin-left: 20px;
+  transition: all 0.3s ease;
 }
 
 .header nav button:hover {
-  background-color: #444444; 
-  border-color: #cccccc; 
+  background-color: #000;
+  color: #fff;
 }

@@ -1,32 +1,57 @@
+/* src/components/Home.css */
+
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f7f5ef;
+  min-height: 100vh;
+}
+
+h1 {
+  text-align: center;
+  font-weight: 400;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  color: #000;
+}
+
+/* Контейнер для сітки */
 .posts {
-    display: flex;
-    flex-wrap: wrap; /* щоб пости підлаштовувалися під ширину */
-    gap: 20px;       /* відстань між постами */
-    padding: 20px;
-    justify-content: center; /* по центру */
-  }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 0;
   
-  .posts img {
-    border-radius: 8px;   /* закруглені кути */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* легка тінь */
-    display: block;
-    margin-bottom: 10px;
-    width: 200px;  /* Приклад ширини */
-    height: 200px; 
-    object-fit: cover; 
-  }
+  /* 👇 ЦЕ ЦЕНТРУЄ ТОВАРИ 👇 */
+  justify-content: center; 
   
-  .posts h3 {
-    font-size: 18px;
-    margin: 5px 0;
-    text-align: center;
+  margin-bottom: 60px;
+}
+
+.post-wrapper {
+  /* 4 товари в ряд */
+  width: calc(25% - 15px); 
+  box-sizing: border-box;
+  display: flex;
+  min-width: 220px;
+}
+
+/* Адаптивність */
+@media (max-width: 900px) {
+  .post-wrapper {
+    width: calc(33.33% - 14px); /* 3 в ряд */
   }
-  
-  .posts p {
-    font-size: 14px;
-    line-height: 1.5;
-    max-width: 200px; /* обмежуємо ширину тексту */
-    text-align: center;
-    margin: 0 auto 15px auto;
+}
+
+@media (max-width: 600px) {
+  .post-wrapper {
+    width: calc(50% - 10px); /* 2 в ряд */
   }
-  
+}
+
+@media (max-width: 400px) {
+  .post-wrapper {
+    width: 100%; /* 1 в ряд */
+  }
+}
