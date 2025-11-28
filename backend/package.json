@@ -3,15 +3,21 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
-  "scripts": {
-    "test": "jest --detectOpenHandles",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
-  },
+ "scripts": {
+    "start": "node --import ./instrumentation.js index.js",
+    "dev": "nodemon --exec node --import ./instrumentation.js index.js",
+    "test": "jest"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "^0.67.2",
+    "@opentelemetry/exporter-metrics-otlp-proto": "^0.208.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.208.0",
+    "@opentelemetry/resources": "^2.2.0",
+    "@opentelemetry/sdk-node": "^0.208.0",
+    "@opentelemetry/semantic-conventions": "^1.38.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
