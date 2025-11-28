@@ -29,7 +29,7 @@ router.post("/reviews", authenticateToken, (req, res) => {
         return sendError(res, req, "Validation error: Missing fields or comment too short", 400, "VALIDATION_ERROR");
     }
 
-    const tableName = productType === 'vinyl' ? "ReviewsVinyls" : "ReviewsCassettes";
+    const tableName = productType === 'vinyl' ? "reviewsvinyls" : "reviewscassettes";
     const productField = productType === 'vinyl' ? "vinyl_id" : "cassette_id";
     
     const sql = `
@@ -70,7 +70,7 @@ router.get("/reviews", (req, res) => {
     const { productType, productId } = req.query;
 
     if (productType && productId) {
-        const tableName = productType === 'vinyl' ? "ReviewsVinyls" : "ReviewsCassettes";
+        const tableName = productType === 'vinyl' ? "reviewsvinyls" : "reviewscassettes";
         const productField = productType === 'vinyl' ? "vinyl_id" : "cassette_id";
         
         const sql = `
@@ -89,14 +89,14 @@ router.get("/reviews", (req, res) => {
             res.status(200).json(results);
         });
 
-    } else {
+    } else { /*ЦЮ частину можливо прийдеться міняти */
         const sqlCassettes = `
             SELECT R.ID, R.userId, R.rating, R.comment, R.date, 'cassette' as product_type, R.cassette_id as productId, U.username as username
-            FROM ReviewsCassettes R JOIN Users U ON R.userId = U.user_id`;
+            FROM reviewscassettes R JOIN Users U ON R.userId = U.user_id`;
 
         const sqlVinyls = `
             SELECT R.ID, R.userId, R.rating, R.comment, R.date, 'vinyl' as product_type, R.vinyl_id as productId, U.username as username
-            FROM ReviewsVinyls R JOIN Users U ON R.userId = U.user_id`;
+            FROM reviewsvinyls R JOIN Users U ON R.userId = U.user_id`;
         
         db.query(sqlCassettes, (err, cassResults) => {
             if (err) return res.status(500).json({ error: "DBError", message: "Cassettes query failed: " + err.message });
@@ -123,9 +123,9 @@ router.put("/reviews/:id", authenticateToken, async (req, res) => {
 
     if (userRole !== 'Admin') {
         const findReviewSql = `
-            SELECT userId FROM ReviewsVinyls WHERE ID = ? 
+            SELECT userId FROM reviewsvinyls WHERE ID = ? 
             UNION ALL 
-            SELECT userId FROM ReviewsCassettes WHERE ID = ?
+            SELECT userId FROM reviewscassettes WHERE ID = ?
         `;
 
         try {
@@ -159,8 +159,8 @@ router.put("/reviews/:id", authenticateToken, async (req, res) => {
          });
     };
 
-    const sqlUpdateCassette = "UPDATE ReviewsCassettes SET rating = ?, comment = ? WHERE ID = ?";
-    const sqlUpdateVinyl = "UPDATE ReviewsVinyls SET rating = ?, comment = ? WHERE ID = ?";
+    const sqlUpdateCassette = "UPDATE reviewscassettes SET rating = ?, comment = ? WHERE ID = ?";
+    const sqlUpdateVinyl = "UPDATE reviewsvinyls SET rating = ?, comment = ? WHERE ID = ?";
 
     updateReview(sqlUpdateCassette)
         .then(affectedRows => {
@@ -184,9 +184,9 @@ router.delete("/reviews/:id", authenticateToken, async (req, res) => {
     if (userRole !== 'Admin') { 
         
         const findReviewSql = `
-            SELECT userId FROM ReviewsVinyls WHERE ID = ? 
+            SELECT userId FROM reviewsvinyls WHERE ID = ? 
             UNION ALL 
-            SELECT userId FROM ReviewsCassettes WHERE ID = ?
+            SELECT userId FROM reviewscassettes WHERE ID = ?
         `;
         
         try {
@@ -211,8 +211,8 @@ router.delete("/reviews/:id", authenticateToken, async (req, res) => {
          });
     };
 
-    const sqlDeleteCassette = "DELETE FROM ReviewsCassettes WHERE ID = ?";
-    const sqlDeleteVinyl = "DELETE FROM ReviewsVinyls WHERE ID = ?";
+    const sqlDeleteCassette = "DELETE FROM reviewscassettes WHERE ID = ?";
+    const sqlDeleteVinyl = "DELETE FROM reviewsvinyls WHERE ID = ?";
 
     deleteReview(sqlDeleteCassette)
         .then(affectedRows => {
