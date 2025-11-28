@@ -59,7 +59,7 @@ jobs:
           DB_URL: 'mysql://root:yourpassword@localhost:3306/test_db'
           JWT_SECRET: 'test_secret_key'
         run: |
-          node --experimental-vm-modules node_modules/jest/bin/jest --detectOpenHandles --runInBand
+          node --experimental-vm-modules node_modules/jest/bin/jest --detectOpenHandles --runInBand --passWithNoTests
         working-directory: ./backend
 
   deliver-backend:

@@ -18,15 +18,13 @@ app.use(cors({
     exposedHeaders: ['Retry-After', 'X-Request-Id'],
 }));
 
-const dbUrl = process.env.NODE_ENV === 'test' 
-    ? (process.env.DB_URL || 'mysql://root:yourpassword@localhost:3306/test_db') 
-    : "mysql://stasnya:Aa20061095!@26.210.121.124:3306/music_catalog"; 
+const dbUrl = process.env.DB_URL || "mysql://vinilcasethub:1111111@10.10.10.73:3306/vinilcasethub";
 
 export const db = mysql.createPool({
+    uri: dbUrl,
     connectionLimit: 10,
     waitForConnections: true,
-    queueLimit: 0,
-    uri: dbUrl 
+    queueLimit: 0
 });
 
 const rate = new Map();
