@@ -32,7 +32,7 @@ describe('Review API Integration Tests (Real Controller)', () => {
   beforeAll(async () => {
     try {
       await db.promise().query(`
-        CREATE TABLE IF NOT EXISTS Users (
+        CREATE TABLE IF NOT EXISTS users (
           user_id INT PRIMARY KEY AUTO_INCREMENT,
           username VARCHAR(255) NOT NULL,
           email VARCHAR(255) NOT NULL UNIQUE,
@@ -44,12 +44,12 @@ describe('Review API Integration Tests (Real Controller)', () => {
       `);
       
       await db.promise().query(
-        'INSERT IGNORE INTO Users (user_id, username, email, password_hash, role) VALUES (?, ?, ?, ?, ?)',
+        'INSERT IGNORE INTO users (user_id, username, email, password_hash, role) VALUES (?, ?, ?, ?, ?)',
         [TEST_USER_ID, 'test_user', 'test@example.com', 'dummy_password_hash', 'User']
       );
 
       await db.promise().query(`
-        CREATE TABLE IF NOT EXISTS ReviewsVinyls (
+        CREATE TABLE IF NOT EXISTS reviewsvinyls (
           ID INT AUTO_INCREMENT PRIMARY KEY,
           vinyl_id INT,
           userId INT,
@@ -61,7 +61,7 @@ describe('Review API Integration Tests (Real Controller)', () => {
       `);
       
       await db.promise().query(`
-        CREATE TABLE IF NOT EXISTS ReviewsCassettes (
+        CREATE TABLE IF NOT EXISTS reviewscassettes (
           ID INT AUTO_INCREMENT PRIMARY KEY,
           cassette_id INT,
           userId INT,
