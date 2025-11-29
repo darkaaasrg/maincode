@@ -4,8 +4,8 @@
   "type": "module",
   "main": "index.js",
  "scripts": {
-    "start": "node --import ./instrumentation.js index.js",
-    "dev": "nodemon --exec node --import ./instrumentation.js index.js",
+    "start": "nodemon index.js",
+    "dev": "nodemon index.js",
     "test": "jest"
 },
   "keywords": [],

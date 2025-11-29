@@ -1,31 +1,60 @@
-// коментар
 import express from "express";
 import mysql from "mysql2";
+import { createConnection } from "mysql2/promise";
 import cors from "cors";
 import { v4 as uuidv4 } from 'uuid';
 
 import productController from "./api/productController.js";
 import reviewController from "./api/reviewController.js";
 import authController from "./api/authController.js";
-import profileController from "./api/profileController.js"; 
+import profileController from "./api/profileController.js";
 
 const app = express();
-const PORT = process.env.PORT || 5000; 
+const PORT = process.env.PORT || 5000;
+
+const DB_LOCAL = process.env.DB_URL_LOCAL || "mysql://vinilcasethub:1111111@10.10.10.73:3306/vinilcasethub";
+const DB_EXTERNAL = process.env.DB_URL_EXTERNAL || "mysql://vinilcasethub:1111111@193.109.144.160:4391/vinilcasethub";
+
+async function getWorkingDbUrl() {
+    console.log("Перевірка підключення до бази даних...");
+
+    try {
+        console.log(` Спроба підключення (Local): ${DB_LOCAL.split('@')[1]}`);
+        const conn = await createConnection({ uri: DB_LOCAL, connectTimeout: 3000 });
+        await conn.end();
+        console.log(" Успішно: Використовується локальна мережа.");
+        return DB_LOCAL;
+    } catch (err) {
+        console.warn(`Локальне підключення не вдалося: ${err.message}`);
+    }
+
+    try {
+        console.log(` Спроба підключення (External): ${DB_EXTERNAL.split('@')[1]}`);
+        const conn = await createConnection({ uri: DB_EXTERNAL, connectTimeout: 5000 });
+        await conn.end();
+        console.log(" Успішно: Використовується зовнішня мережа.");
+        return DB_EXTERNAL;
+    } catch (err) {
+        console.error(`Критична помилка: Не вдалося підключитися до жодної БД.`);
+        process.exit(1);
+    }
+}
+
+const activeDbUrl = await getWorkingDbUrl();
+
+export const db = mysql.createPool({
+    uri: activeDbUrl,
+    connectionLimit: 10,
+    waitForConnections: true,
+    queueLimit: 0,
+    connectTimeout: 10000
+});
 
 app.use(cors());
 app.use(express.json());
 app.use(cors({
     exposedHeaders: ['Retry-After', 'X-Request-Id'],
 }));
-
-const dbUrl = process.env.DB_URL || "mysql://vinilcasethub:1111111@10.10.10.73:3306/vinilcasethub";
-
-export const db = mysql.createPool({
-    uri: dbUrl,
-    connectionLimit: 10,
-    waitForConnections: true,
-    queueLimit: 0
-});
 
 const rate = new Map();
 const WINDOW_MS = 10_000, MAX_REQ = 50;
@@ -51,11 +80,11 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use("/api", authController); 
-app.use("/api/profile", profileController); 
-app.use("/api", productController); 
+app.use("/api", authController);
+app.use("/api/profile", profileController);
+app.use("/api", productController);
 app.use("/api", reviewController);
-app.use("/uploads", express.static("uploads")); 
+app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
     res.send("API працює! Маршрути підключено.");
@@ -66,5 +95,6 @@ export default app;
 if (process.env.NODE_ENV !== 'test') {
     app.listen(PORT, () => {
         console.log(`Сервер запущено на http://localhost:${PORT}`);
+        console.log(`База даних підключена через: ${activeDbUrl.includes('10.10.10.73') ? 'LOCAL' : 'EXTERNAL'} IP`);
     });
 }
