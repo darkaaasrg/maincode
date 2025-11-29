@@ -11,7 +11,8 @@ services:
       - "5000:5000"
     environment:
       PORT: 5000
-      DB_URL: mysql://vinilcasethub:1111111@193.109.144.160:4391/vinilcasethub
+      DB_URL_LOCAL: mysql://vinilcasethub:1111111@10.10.10.73:3306/vinilcasethub
+      DB_URL_EXTERNAL: mysql://vinilcasethub:1111111@193.109.144.160:4391/vinilcasethub
       JWT_SECRET: YOUR_SUPER_SECRET_KEY_FOR_JWT
 
   web:
