@@ -79,7 +79,7 @@ router.get("/reviews", (req, res) => {
                 '${productType}' as product_type, ${productField} as productId,
                 U.username as username
             FROM ${tableName} R
-            JOIN Users U ON R.userId = U.user_id
+            JOIN users U ON R.userId = U.user_id
             WHERE R.${productField} = ?`;
 
         db.query(sql, [productId], (err, results) => {
@@ -92,11 +92,11 @@ router.get("/reviews", (req, res) => {
     } else { /*ЦЮ частину можливо прийдеться міняти */
         const sqlCassettes = `
             SELECT R.ID, R.userId, R.rating, R.comment, R.date, 'cassette' as product_type, R.cassette_id as productId, U.username as username
-            FROM reviewscassettes R JOIN Users U ON R.userId = U.user_id`;
+            FROM reviewscassettes R JOIN users U ON R.userId = U.user_id`;
 
         const sqlVinyls = `
             SELECT R.ID, R.userId, R.rating, R.comment, R.date, 'vinyl' as product_type, R.vinyl_id as productId, U.username as username
-            FROM reviewsvinyls R JOIN Users U ON R.userId = U.user_id`;
+            FROM reviewsvinyls R JOIN users U ON R.userId = U.user_id`;
         
         db.query(sqlCassettes, (err, cassResults) => {
             if (err) return res.status(500).json({ error: "DBError", message: "Cassettes query failed: " + err.message });

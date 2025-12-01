@@ -45,9 +45,9 @@ export const isReviewAuthor = async (req, res, next) => {
     const userIdFromToken = req.user.id; 
     
     const findReviewSql = `
-        SELECT userId FROM ReviewsVinyls WHERE ID = ? 
+        SELECT userId FROM reviewsvinyls WHERE ID = ? 
         UNION ALL 
-        SELECT userId FROM ReviewsCassettes WHERE ID = ?
+        SELECT userId FROM reviewscassettes WHERE ID = ?
     `;
     
     try {
