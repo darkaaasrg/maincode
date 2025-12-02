@@ -1,5 +1,3 @@
-/* src/Cassettes.css */
-
 .catalog-page {
   max-width: 1000px;
   margin: 0 auto;
@@ -22,7 +20,6 @@
   gap: 20px;
 }
 
-/* --- СТИЛЬ ГОРИЗОНТАЛЬНОЇ КАРТКИ --- */
 .catalog-item {
   display: flex;
   background-color: #fff;
@@ -37,7 +34,6 @@
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-/* ЛІВА ЧАСТИНА: КАРТИНКА */
 .item-image-wrapper {
   width: 250px;
   min-width: 250px;
@@ -56,7 +52,6 @@
   object-fit: cover; 
 }
 
-/* ПРАВА ЧАСТИНА: ІНФОРМАЦІЯ */
 .item-details {
   padding: 20px 25px;
   display: flex;
@@ -104,7 +99,6 @@
   max-width: 600px;
 }
 
-/* ФУТЕР КАРТКИ */
 .item-footer {
   display: flex;
   align-items: center;
@@ -165,7 +159,6 @@
   color: red;
 }
 
-/* СТИЛІ МОДАЛЬНОГО ВІКНА */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -256,15 +249,81 @@
   opacity: 0.8;
 }
 
-/* Адаптивність */
-@media (max-width: 768px) {
-  .catalog-item {
-    flex-direction: column;
-  }
-  .item-image-wrapper {
-    width: 100%;
-    height: 300px;
-    border-right: none;
-    border-bottom: 1px solid #eee;
-  }
+.detail-modal-content {
+  padding: 40px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.close-cross-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+  color: #888;
+}
+.close-cross-btn:hover {
+  color: #000;
+}
+
+.detail-layout {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 30px;
+}
+
+.detail-image-block img {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.detail-info-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-info-block h2 {
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.detail-meta-grid p {
+  margin: 5px 0;
+  font-size: 15px;
+  color: #444;
+}
+
+.detail-price-large {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 20px 0;
+}
+
+.large-add-btn {
+  padding: 15px 30px;
+  font-size: 18px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.3s;
+}
+.large-add-btn:hover {
+  background-color: #333;
+}
+
+.detail-reviews-section {
+  margin-top: 20px;
 }

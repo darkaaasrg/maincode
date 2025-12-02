@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./Cassettes.css";
+import ReviewsContainer from "./components/ReviewsContainer";
 
 export default function Cassettes() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cassetteList, setCassetteList] = useState([]);
   
-  // Стан для модального вікна
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(""); // Якщо порожнє - створення, якщо є ID - редагування
+  const [editId, setEditId] = useState(""); 
   
-  // Стан форми
+  const [selectedCassette, setSelectedCassette] = useState(null);
+
   const [formData, setFormData] = useState({
     Title: "",
     Artist: "",
@@ -21,22 +22,11 @@ export default function Cassettes() {
   });
   const [selectedFile, setSelectedFile] = useState(null);
 
-  // --- ЛОГІКА ВІДГУКІВ (ЗАКОМЕНТОВАНА) ---
-  /*
-  const [reviews, setReviews] = useState([]);
-  const loadReviews = (productId) => {
-      // Тут буде запит до бекенду: GET /api/reviews?productId=...
-      console.log("Завантаження відгуків для:", productId);
-  };
-  */
-  // ---------------------------------------
-
   useEffect(() => {
     loadCassettes();
   }, []);
 
   const loadCassettes = () => {
-    // Звертаємося до ендпоінту касет (переконайся, що він є на бекенді, або використовуй api/products з фільтром)
     fetch("http://localhost:5000/api/cassettes")
       .then((res) => res.json())
       .then((data) => {
@@ -50,9 +40,10 @@ export default function Cassettes() {
       .catch((err) => console.error("Помилка:", err));
   };
 
-  const handleOpenModal = (cassette = null) => {
+  const handleOpenEditModal = (cassette = null, e = null) => {
+    if (e) e.stopPropagation();
+
     if (cassette) {
-      // РЕЖИМ РЕДАГУВАННЯ
       setFormData({
         Title: cassette.Title,
         Artist: cassette.Artist,
@@ -62,21 +53,26 @@ export default function Cassettes() {
         Price: cassette.Price,
         Photo: cassette.Photo,
       });
-      setSelectedId(cassette.ID);
+      setEditId(cassette.ID);
     } else {
-      // РЕЖИМ СТВОРЕННЯ
-      setFormData({
-        Title: "", Artist: "", Genre: "", Country: "", Published: "", Price: "", Photo: "",
-      });
-      setSelectedId("");
+      setFormData({ Title: "", Artist: "", Genre: "", Country: "", Published: "", Price: "", Photo: "" });
+      setEditId("");
     }
     setIsModalOpen(true);
     setSelectedFile(null);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseEditModal = () => {
     setIsModalOpen(false);
     setSelectedFile(null);
+  };
+
+  const handleOpenDetailModal = (cassette) => {
+    setSelectedCassette(cassette);
+  };
+
+  const handleCloseDetailModal = () => {
+    setSelectedCassette(null);
   };
 
   const handleChange = (e) => {
@@ -93,21 +89,17 @@ export default function Cassettes() {
 
     setIsSubmitting(true);
     try {
-      const method = selectedId ? "PUT" : "POST";
-      const url = selectedId
-        ? `http://localhost:5000/api/cassettes/${selectedId}`
+      const method = editId ? "PUT" : "POST";
+      const url = editId
+        ? `http://localhost:5000/api/cassettes/${editId}`
         : "http://localhost:5000/api/cassettes";
 
       const data = new FormData();
       Object.keys(formData).forEach(key => {
         if (key !== 'Photo') data.append(key, formData[key]);
       });
-      
       if (selectedFile) {
         data.append('Photo', selectedFile);
-      } else {
-         // Якщо створюємо нову касету, важливо передати тип "Касета" (якщо бекенд цього не робить сам)
-         // data.append('Type', 'Касета'); 
       }
 
       const res = await fetch(url, {
@@ -119,7 +111,7 @@ export default function Cassettes() {
       if (!res.ok) throw new Error("Помилка при збереженні");
 
       loadCassettes();
-      handleCloseModal();
+      handleCloseEditModal();
     } catch (err) {
       console.error(err);
       alert(`Помилка: ${err.message}`);
@@ -128,7 +120,9 @@ export default function Cassettes() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, e) => {
+    if (e) e.stopPropagation();
+    
     const token = localStorage.getItem('authToken');
     if (!token) {
       alert("Помилка: Потрібно увійти як Адміністратор.");
@@ -158,9 +152,8 @@ export default function Cassettes() {
     <div className="catalog-page">
       <h1>Каталог Касет</h1>
 
-      {/* Кнопка додавання зверху */}
       <div style={{textAlign: 'center', marginBottom: '30px'}}>
-         <button className="add-vinyl-btn" onClick={() => handleOpenModal(null)}>
+         <button className="add-vinyl-btn" onClick={(e) => handleOpenEditModal(null, e)}>
            + Додати нову касету
          </button>
       </div>
@@ -168,9 +161,8 @@ export default function Cassettes() {
       <div className="catalog-list">
         {cassetteList.length > 0 ? (
           cassetteList.map((item) => (
-            <div key={item.ID} className="catalog-item">
+            <div key={item.ID} className="catalog-item" onClick={() => handleOpenDetailModal(item)}>
               
-              {/* ЗЛІВА: Картинка */}
               <div className="item-image-wrapper">
                 <img 
                   src={item.Photo ? `http://localhost:5000/uploads/${item.Photo}` : 'https://via.placeholder.com/250'} 
@@ -178,7 +170,6 @@ export default function Cassettes() {
                 />
               </div>
 
-              {/* СПРАВА: Інформація */}
               <div className="item-details">
                 <div>
                   <div className="item-header">
@@ -190,31 +181,21 @@ export default function Cassettes() {
                     </div>
                   </div>
                   <p className="item-description">
-                     {item.Genre ? `Жанр: ${item.Genre}` : "Опис відсутній"}
+                     {item.Genre ? `Жанр: ${item.Genre}` : ""}
                   </p>
-
-                  {/* 🟢 ЗАКОМЕНТОВАНА ЛОГІКА ВІДГУКІВ */}
-                  {/* <div className="item-reviews-section">
-                    <h4>Відгуки:</h4>
-                    <p style={{fontSize: '12px', color: '#888'}}>Поки що відгуків немає.</p>
-                  </div> 
-                  */}
-
                 </div>
 
-                {/* НИЗ: Ціна та Кнопки */}
                 <div className="item-footer">
                   <span className="item-price">
                     {Number(item.Price).toFixed(2)} ₴
                   </span>
                   
                   <div className="item-actions">
-                    <button className="add-btn" onClick={() => handleAddToCart(item)}>
+                    <button className="add-btn" onClick={(e) => { e.stopPropagation(); handleAddToCart(item); }}>
                       В кошик
                     </button>
-                    
-                    <button className="edit-btn" onClick={() => handleOpenModal(item)}>✏️</button>
-                    <button className="delete-mini-btn" onClick={() => handleDelete(item.ID)}>🗑️</button>
+                    <button className="edit-btn" onClick={(e) => handleOpenEditModal(item, e)}>✏️</button>
+                    <button className="delete-mini-btn" onClick={(e) => handleDelete(item.ID, e)}>🗑️</button>
                   </div>
                 </div>
               </div>
@@ -226,11 +207,58 @@ export default function Cassettes() {
         )}
       </div>
 
-      {/* МОДАЛЬНЕ ВІКНО */}
+      {selectedCassette && (
+        <div className="modal-overlay" onClick={handleCloseDetailModal}>
+          <div 
+            className="modal-content detail-modal-content" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: '1100px', maxWidth: '95%' }}
+          >
+            <button className="close-cross-btn" onClick={handleCloseDetailModal}>×</button>
+            
+            <div className="detail-layout">
+              <div className="detail-image-block">
+                <img 
+                   src={selectedCassette.Photo ? `http://localhost:5000/uploads/${selectedCassette.Photo}` : 'https://via.placeholder.com/300'} 
+                   alt={selectedCassette.Title} 
+                />
+              </div>
+              
+              <div className="detail-info-block">
+                <h2>{selectedCassette.Title}</h2>
+                <h3 style={{color: '#555', marginTop: '-10px'}}>{selectedCassette.Artist}</h3>
+                
+                <div className="detail-meta-grid">
+                   <p><strong>Жанр:</strong> {selectedCassette.Genre}</p>
+                   <p><strong>Країна:</strong> {selectedCassette.Country}</p>
+                   <p><strong>Рік:</strong> {selectedCassette.Published}</p>
+                </div>
+                
+                <p className="detail-price-large">{Number(selectedCassette.Price).toFixed(2)} ₴</p>
+                
+                <button 
+                  className="add-btn large-add-btn" 
+                  onClick={() => handleAddToCart(selectedCassette)}
+                >
+                  Додати в кошик
+                </button>
+              </div>
+            </div>
+
+            <div className="detail-reviews-section">
+               <ReviewsContainer 
+                  productId={selectedCassette.ID} 
+                  productType="cassette"
+               />
+            </div>
+          </div>
+        </div>
+      )}
+
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>{selectedId ? "Редагувати касету" : "Створити нову касету"}</h3>
+            <h3>{editId ? "Редагувати касету" : "Створити нову касету"}</h3>
             
             <div className="form-group">
               <input name="Title" placeholder="Назва" value={formData.Title} onChange={handleChange} />
@@ -252,7 +280,7 @@ export default function Cassettes() {
               <input type="file" name="Photo" onChange={(e) => setSelectedFile(e.target.files[0])} />
             </div>
 
-            {selectedId && formData.Photo && !selectedFile && (
+            {editId && formData.Photo && !selectedFile && (
                <div style={{ marginBottom: '15px' }}>
                  <p style={{fontSize: '12px', marginBottom: '5px'}}>Поточне фото:</p>
                  <img src={`http://localhost:5000/uploads/${formData.Photo}`} style={{width: '80px'}} alt="current"/>
@@ -263,7 +291,7 @@ export default function Cassettes() {
               <button className="save-btn" onClick={handleSave} disabled={isSubmitting}>
                 {isSubmitting ? "Збереження..." : "Зберегти"}
               </button>
-              <button className="close-btn" onClick={handleCloseModal}>Скасувати</button>
+              <button className="close-btn" onClick={handleCloseEditModal}>Скасувати</button>
             </div>
           </div>
         </div>

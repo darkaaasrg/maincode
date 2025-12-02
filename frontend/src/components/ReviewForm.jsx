@@ -1,111 +1,110 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-// API_URL має відповідати серверу Express
 const API_URL = "http://localhost:5000/api/reviews"; 
 
-export default function ReviewForm({ onAdd, productId, productType }) {
-    // Встановлюємо початковий стан для форми
-    const [userId, setUserId] = useState("");
+export default function ReviewForm({ onAdd, onUpdate, onCancel, editingReview, productId, productType }) {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
     const [error, setError] = useState(null);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const userStr = localStorage.getItem('user');
+        if (userStr) { try { setUser(JSON.parse(userStr)); } catch (e) {} }
+    }, []);
+
+    useEffect(() => {
+        if (editingReview) {
+            setComment(editingReview.comment || editingReview.text || "");
+            setRating(editingReview.rating || 5);
+        } else {
+            setComment("");
+            setRating(5);
+        }
+    }, [editingReview]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
         
-        // Клієнтська валідація
-        if (!userId || !comment || comment.length < 3) {
-            setError("Будь ласка, вкажіть ID користувача та коментар (мінімум 3 символи).");
-            return;
-        }
-        
-        // Додаткова перевірка, щоб уникнути помилок 400 на бекенді
-        if (!productId || !productType) {
-             setError("Помилка: ID або тип продукту не визначені.");
-            return;
-        }
+        const token = localStorage.getItem('authToken');
+        if (!token) return setError("Потрібна авторизація.");
+        if (comment.trim().length < 3) return setError("Коментар надто короткий.");
 
-        // Формування тіла запиту (ReviewCreateRequest)
-        const reviewData = {
-            user: userId,
-            productType: productType, 
-            productId: productId,     
-            text: comment,
-            rating: rating,
+        const method = editingReview ? "PUT" : "POST";
+        const url = editingReview ? `${API_URL}/${editingReview.ID}` : API_URL;
+
+        const bodyData = {
+            productType, productId, 
+            text: comment, comment: comment, rating
         };
 
         try {
-            // Виконання POST-запиту
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(reviewData),
+            const response = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                body: JSON.stringify(bodyData),
             });
 
-            // Обробка відповіді (201 успіх або 400 помилка)
             if (response.ok) {
-                const newReview = await response.json();
-                console.log("Відгук успішно створено (201):", newReview);
-                
-                // Викликаємо функцію, щоб оновити список відгуків на сторінці
-                onAdd(newReview); 
-
-                // Очищення форми
-                setUserId("");
+                if (editingReview) {
+                    onUpdate({ ...editingReview, comment, rating });
+                } else {
+                    const newReview = await response.json();
+                    const displayName = user?.username || user?.email || "Я";
+                    onAdd({ ...newReview, username: displayName });
+                }
                 setComment("");
+                setError(null);
             } else {
-                const errorData = await response.json();
-                console.error(`Помилка API (${response.status}):`, errorData);
-                
-                // Виведення повідомлення про помилку
-                alert("Не вдалося додати відгук."); // Використовуємо alert, як у вашому скріншоті
-                setError(errorData.details?.[0]?.message || `Помилка: ${errorData.code}`);
+                const errData = await response.json();
+                setError(errData.message || "Помилка збереження.");
             }
-        } catch (err) {
-            // Мережеві помилки (якщо бекенд не відповідає)
-            console.error("Мережева помилка:", err);
-            alert("Не вдалося додати відгук.");
-            setError("Не вдалося підключитися до API. Перевірте, чи запущено бекенд.");
-        }
+        } catch (err) { setError("Помилка з'єднання."); }
     };
 
+    if (!user) return <div style={{textAlign: 'center', color: '#666', marginTop: '20px'}}>Увійдіть, щоб писати відгуки.</div>;
+
+    const displayUserName = user.username || user.email || "Користувач";
+
     return (
-        <form onSubmit={handleSubmit} className="mt-4">
-            {error && <div className="text-red-500 mb-2 p-2 border border-red-500 rounded">{error}</div>}
+        <form 
+            onSubmit={handleSubmit} 
+            className={`review-form-container ${editingReview ? 'edit-mode' : ''}`}
+        >
+            {editingReview && <div style={{color: '#2563eb', fontWeight: 'bold', marginBottom: '10px'}}>✏️ Редагування відгуку:</div>}
             
-            <div className="flex items-center space-x-2">
-                {/* Ці поля повинні бути згруповані і відформатовані для мобільного */}
-                <input
-                    className="border p-2 rounded flex-grow"
-                    placeholder="Ваш ID"
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                />
-                <input
-                    type="number"
-                    min="1"
-                    max="5"
-                    className="border p-2 rounded w-16 text-center"
-                    value={rating}
-                    onChange={(e) => setRating(+e.target.value)}
-                />
-            </div>
-            <div className="flex items-center mt-2">
-                <input
-                    className="border p-2 rounded flex-grow"
-                    placeholder="Ваш коментар"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                />
-                <button 
-                    className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition ml-2"
-                    type="submit"
-                >
-                    Додати відгук
-                </button>
+            {error && <div className="error-msg">{error}</div>}
+            
+            <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                <div className="form-header">
+                    <span className="form-user-name">{displayUserName} <span style={{fontWeight:'normal', fontSize:'12px'}}>(Ви)</span></span>
+                    <select 
+                        className="rating-select"
+                        value={rating}
+                        onChange={(e) => setRating(+e.target.value)}
+                    >
+                        {[5,4,3,2,1].map(r => <option key={r} value={r}>{r} ⭐</option>)}
+                    </select>
+                </div>
+
+                <div className="form-inputs">
+                    <input
+                        className="review-input"
+                        placeholder="Напишіть ваш відгук..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                    />
+                    <button className="submit-btn" type="submit">
+                        {editingReview ? "Зберегти" : "Надіслати"}
+                    </button>
+                    
+                    {editingReview && (
+                        <button type="button" onClick={onCancel} className="cancel-btn">
+                            Скасувати
+                        </button>
+                    )}
+                </div>
             </div>
         </form>
     );
