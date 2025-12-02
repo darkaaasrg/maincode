@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./Vinyls.css";
+import ReviewsContainer from "./components/ReviewsContainer";
 
 export default function Vinyls() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [vinylList, setVinylList] = useState([]);
   
-  // Стан для модального вікна
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(""); // Якщо порожнє - це створення, якщо є ID - редагування
+  const [editId, setEditId] = useState("");
   
-  // Стан форми
+  const [selectedVinyl, setSelectedVinyl] = useState(null);
+
   const [formData, setFormData] = useState({
     Title: "",
     Artist: "",
@@ -20,16 +21,6 @@ export default function Vinyls() {
     Photo: "",
   });
   const [selectedFile, setSelectedFile] = useState(null);
-
-  // --- ЛОГІКА ВІДГУКІВ (ЗАКОМЕНТОВАНА) ---
-  /*
-  const [reviews, setReviews] = useState([]);
-  const loadReviews = (productId) => {
-      // Тут буде запит до бекенду: GET /api/reviews?productId=...
-      console.log("Завантаження відгуків для:", productId);
-  };
-  */
-  // ---------------------------------------
 
   useEffect(() => {
     loadVinyls();
@@ -49,10 +40,10 @@ export default function Vinyls() {
       .catch((err) => console.error("Помилка:", err));
   };
 
-  // Відкриття модалки (для створення або редагування)
-  const handleOpenModal = (vinyl = null) => {
+  const handleOpenEditModal = (vinyl = null, e = null) => {
+    if (e) e.stopPropagation();
+
     if (vinyl) {
-      // РЕЖИМ РЕДАГУВАННЯ
       setFormData({
         Title: vinyl.Title,
         Artist: vinyl.Artist,
@@ -62,21 +53,26 @@ export default function Vinyls() {
         Price: vinyl.Price,
         Photo: vinyl.Photo,
       });
-      setSelectedId(vinyl.ID);
+      setEditId(vinyl.ID);
     } else {
-      // РЕЖИМ СТВОРЕННЯ (очищаємо форму)
-      setFormData({
-        Title: "", Artist: "", Genre: "", Country: "", Published: "", Price: "", Photo: "",
-      });
-      setSelectedId("");
+      setFormData({ Title: "", Artist: "", Genre: "", Country: "", Published: "", Price: "", Photo: "" });
+      setEditId("");
     }
     setIsModalOpen(true);
     setSelectedFile(null);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseEditModal = () => {
     setIsModalOpen(false);
     setSelectedFile(null);
+  };
+
+  const handleOpenDetailModal = (vinyl) => {
+    setSelectedVinyl(vinyl);
+  };
+
+  const handleCloseDetailModal = () => {
+    setSelectedVinyl(null);
   };
 
   const handleChange = (e) => {
@@ -93,17 +89,15 @@ export default function Vinyls() {
 
     setIsSubmitting(true);
     try {
-      const method = selectedId ? "PUT" : "POST";
-      const url = selectedId
-        ? `http://localhost:5000/api/vinyls/${selectedId}`
+      const method = editId ? "PUT" : "POST";
+      const url = editId
+        ? `http://localhost:5000/api/vinyls/${editId}`
         : "http://localhost:5000/api/vinyls";
 
       const data = new FormData();
-      // Додаємо поля у FormData
       Object.keys(formData).forEach(key => {
         if (key !== 'Photo') data.append(key, formData[key]);
       });
-      // Додаємо файл, якщо він обраний
       if (selectedFile) {
         data.append('Photo', selectedFile);
       }
@@ -116,8 +110,8 @@ export default function Vinyls() {
 
       if (!res.ok) throw new Error("Помилка при збереженні");
 
-      loadVinyls(); // Оновлюємо список
-      handleCloseModal(); // Закриваємо вікно
+      loadVinyls();
+      handleCloseEditModal();
     } catch (err) {
       console.error(err);
       alert(`Помилка: ${err.message}`);
@@ -126,7 +120,9 @@ export default function Vinyls() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, e) => {
+    if (e) e.stopPropagation();
+    
     const token = localStorage.getItem('authToken');
     if (!token) {
       alert("Помилка: Потрібно увійти як Адміністратор.");
@@ -156,9 +152,8 @@ export default function Vinyls() {
     <div className="catalog-page">
       <h1>Каталог Вінілів</h1>
 
-      {/* 🟢 ЛОГІКА СТВОРЕННЯ: Кнопка додавання зверху */}
       <div style={{textAlign: 'center', marginBottom: '30px'}}>
-         <button className="add-vinyl-btn" onClick={() => handleOpenModal(null)}>
+         <button className="add-vinyl-btn" onClick={(e) => handleOpenEditModal(null, e)}>
            + Додати новий вініл
          </button>
       </div>
@@ -166,9 +161,8 @@ export default function Vinyls() {
       <div className="catalog-list">
         {vinylList.length > 0 ? (
           vinylList.map((item) => (
-            <div key={item.ID} className="catalog-item">
+            <div key={item.ID} className="catalog-item" onClick={() => handleOpenDetailModal(item)}>
               
-              {/* ЗЛІВА: Картинка */}
               <div className="item-image-wrapper">
                 <img 
                   src={item.Photo ? `http://localhost:5000/uploads/${item.Photo}` : 'https://via.placeholder.com/250'} 
@@ -176,45 +170,30 @@ export default function Vinyls() {
                 />
               </div>
 
-              {/* СПРАВА: Інформація */}
               <div className="item-details">
                 <div>
                   <div className="item-header">
                     <h2 className="item-title">{item.Title} — {item.Artist}</h2>
                     <div className="item-meta">
                       {item.Published && <span>Рік: {item.Published}</span>}
-                      {item.Country && <span>Країна: {item.Country}</span>}
-                      {item.Genre && <span>Жанр: {item.Genre}</span>}
                     </div>
                   </div>
                   <p className="item-description">
-                     {item.Genre ? `Жанр: ${item.Genre}` : "Опис відсутній"}
+                     {item.Genre ? `Жанр: ${item.Genre}` : ""}
                   </p>
-
-                  {/* 🟢 ЗАКОМЕНТОВАНА ЛОГІКА ВІДГУКІВ */}
-                  {/* <div className="item-reviews-section">
-                    <h4>Відгуки:</h4>
-                    <p style={{fontSize: '12px', color: '#888'}}>Поки що відгуків немає.</p>
-                    <button className="write-review-btn">Написати відгук</button>
-                  </div> 
-                  */}
-
                 </div>
 
-                {/* НИЗ: Ціна та Кнопки */}
                 <div className="item-footer">
                   <span className="item-price">
                     {Number(item.Price).toFixed(2)} ₴
                   </span>
                   
                   <div className="item-actions">
-                    <button className="add-btn" onClick={() => handleAddToCart(item)}>
+                    <button className="add-btn" onClick={(e) => { e.stopPropagation(); handleAddToCart(item); }}>
                       В кошик
                     </button>
-                    
-                    {/* Кнопка РЕДАГУВАННЯ відкриває те саме модальне вікно, але з даними */}
-                    <button className="edit-btn" onClick={() => handleOpenModal(item)}>✏️</button>
-                    <button className="delete-mini-btn" onClick={() => handleDelete(item.ID)}>🗑️</button>
+                    <button className="edit-btn" onClick={(e) => handleOpenEditModal(item, e)}>✏️</button>
+                    <button className="delete-mini-btn" onClick={(e) => handleDelete(item.ID, e)}>🗑️</button>
                   </div>
                 </div>
               </div>
@@ -226,11 +205,54 @@ export default function Vinyls() {
         )}
       </div>
 
-      {/* 🟢 МОДАЛЬНЕ ВІКНО (POPUP) */}
+      {selectedVinyl && (
+        <div className="modal-overlay" onClick={handleCloseDetailModal}>
+          <div className="modal-content detail-modal-content" style={{ width: '1000px', maxWidth: '95%' }} onClick={(e) => e.stopPropagation()}>
+            <button className="close-cross-btn" onClick={handleCloseDetailModal}>×</button>
+            
+            <div className="detail-layout">
+              <div className="detail-image-block">
+                <img 
+                   src={selectedVinyl.Photo ? `http://localhost:5000/uploads/${selectedVinyl.Photo}` : 'https://via.placeholder.com/300'} 
+                   alt={selectedVinyl.Title}
+                />
+              </div>
+              
+              <div className="detail-info-block">
+                <h2>{selectedVinyl.Title}</h2>
+                <h3 style={{color: '#555', marginTop: '-10px'}}>{selectedVinyl.Artist}</h3>
+                
+                <div className="detail-meta-grid">
+                   <p><strong>Жанр:</strong> {selectedVinyl.Genre}</p>
+                   <p><strong>Країна:</strong> {selectedVinyl.Country}</p>
+                   <p><strong>Рік:</strong> {selectedVinyl.Published}</p>
+                </div>
+                
+                <p className="detail-price-large">{Number(selectedVinyl.Price).toFixed(2)} ₴</p>
+                
+                <button 
+                  className="add-btn large-add-btn" 
+                  onClick={() => handleAddToCart(selectedVinyl)}
+                >
+                  Додати в кошик
+                </button>
+              </div>
+            </div>
+
+            <div className="detail-reviews-section">
+               <ReviewsContainer 
+                  productId={selectedVinyl.ID} 
+                  productType="vinyl" 
+               />
+            </div>
+          </div>
+        </div>
+      )}
+
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>{selectedId ? "Редагувати вініл" : "Створити новий вініл"}</h3>
+            <h3>{editId ? "Редагувати вініл" : "Створити новий вініл"}</h3>
             
             <div className="form-group">
               <input name="Title" placeholder="Назва" value={formData.Title} onChange={handleChange} />
@@ -252,8 +274,7 @@ export default function Vinyls() {
               <input type="file" name="Photo" onChange={(e) => setSelectedFile(e.target.files[0])} />
             </div>
 
-            {/* Попередній перегляд старого фото при редагуванні */}
-            {selectedId && formData.Photo && !selectedFile && (
+            {editId && formData.Photo && !selectedFile && (
                <div style={{ marginBottom: '15px' }}>
                  <p style={{fontSize: '12px', marginBottom: '5px'}}>Поточне фото:</p>
                  <img src={`http://localhost:5000/uploads/${formData.Photo}`} style={{width: '80px'}} alt="current"/>
@@ -264,7 +285,7 @@ export default function Vinyls() {
               <button className="save-btn" onClick={handleSave} disabled={isSubmitting}>
                 {isSubmitting ? "Збереження..." : "Зберегти"}
               </button>
-              <button className="close-btn" onClick={handleCloseModal}>Скасувати</button>
+              <button className="close-btn" onClick={handleCloseEditModal}>Скасувати</button>
             </div>
           </div>
         </div>

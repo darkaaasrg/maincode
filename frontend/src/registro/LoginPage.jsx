@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import './auth.css'; // Підключаємо новий CSS
+import './auth.css';
 
 function LoginPage() {
-    // ВАША ЛОГІКА (БЕЗ ЗМІН)
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -36,7 +35,6 @@ function LoginPage() {
         }
     };
 
-    // ОНОВЛЕНИЙ ДИЗАЙН (HTML)
     return (
         <div className="auth-page">
             <div className="auth-container">
@@ -50,7 +48,7 @@ function LoginPage() {
                         <input
                             type="email"
                             id="email"
-                            className="auth-input" /* Новий клас */
+                            className="auth-input"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -62,14 +60,14 @@ function LoginPage() {
                         <input
                             type="password"
                             id="password"
-                            className="auth-input" /* Новий клас */
+                            className="auth-input"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
                     </div>
 
-                    <button type="submit" className="auth-btn">Увійти</button> {/* Новий клас */}
+                    <button type="submit" className="auth-btn">Увійти</button>
                 </form>
                 
                 <div className="auth-footer">
