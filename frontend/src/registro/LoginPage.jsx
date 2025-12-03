@@ -44,7 +44,7 @@ function LoginPage() {
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email">Email: </label>
                         <input
                             type="email"
                             id="email"
@@ -56,7 +56,7 @@ function LoginPage() {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">Пароль</label>
+                        <label htmlFor="password">Пароль:  </label>
                         <input
                             type="password"
                             id="password"
