@@ -1,28 +1,21 @@
-/* src/registro/auth.css */
-
-/* Загальний фон сторінки */
 .auth-page {
   min-height: calc(100vh - 60px);
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f7f5ef; /* Бежевий фон */
   padding: 20px;
   font-family: 'Arial', sans-serif;
 }
 
-/* Біла картка */
 .auth-container {
   background-color: #fff;
   padding: 40px 50px;
   width: 100%;
   max-width: 400px;
   border: 1px solid #e1e1e1;
-  /* Без тіні або мінімальна */
   box-shadow: none; 
 }
 
-/* Заголовок */
 .auth-title {
   text-align: center;
   text-transform: uppercase;
@@ -33,13 +26,17 @@
   color: #000;
 }
 
-/* Поля вводу */
+
 .form-group {
   margin-bottom: 20px;
+  display: flex; 
+  align-items: center;
 }
 
 .form-group label {
-  display: block;
+  margin-bottom: 0;
+  width: 130px;
+  flex-shrink: 0;
   margin-bottom: 8px;
   font-size: 12px;
   text-transform: uppercase;
@@ -48,11 +45,11 @@
 }
 
 .auth-input {
+  flex-grow: 1;
   width: 100%;
   padding: 12px 15px;
   font-size: 14px;
   border: 1px solid #ccc;
-  border-radius: 0; /* Квадратні кути */
   background-color: #fff;
   box-sizing: border-box;
   transition: border-color 0.3s;
@@ -85,7 +82,6 @@
   color: #000;
 }
 
-/* Повідомлення */
 .error-message {
   background-color: #ffe6e6;
   color: #d9534f;
@@ -106,7 +102,7 @@
   border: 1px solid #b2f5ea;
 }
 
-/* Футер форми */
+
 .auth-footer {
   margin-top: 25px;
   text-align: center;

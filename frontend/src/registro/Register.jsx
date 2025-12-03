@@ -52,11 +52,11 @@ function RegisterPage() {
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="username">Ім'я користувача</label>
+                        <label htmlFor="username">Ім'я користувача: </label>
                         <input
                             type="text"
                             id="username"
-                            className="auth-input" /* Новий клас */
+                            className="auth-input" 
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
@@ -64,11 +64,11 @@ function RegisterPage() {
                     </div>
                     
                     <div className="form-group">
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email">Email: </label>
                         <input
                             type="email"
                             id="email"
-                            className="auth-input" /* Новий клас */
+                            className="auth-input" 
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -76,11 +76,11 @@ function RegisterPage() {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">Пароль</label>
+                        <label htmlFor="password">Пароль: </label>
                         <input
                             type="password"
                             id="password"
-                            className="auth-input" /* Новий клас */
+                            className="auth-input"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
