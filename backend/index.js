@@ -1,3 +1,4 @@
+import { metrics } from '@opentelemetry/api';
 import express from "express";
 import mysql from "mysql2";
 import { createConnection } from "mysql2/promise";
@@ -10,6 +11,20 @@ import authController from "./api/authController.js";
 import profileController from "./api/profileController.js";
 
 const app = express();
+
+const meter = metrics.getMeter('music-catalog-api');
+const requestCounter = meter.createCounter('my_custom_request_count', {
+  description: 'Counts total HTTP requests',
+});
+
+app.use((req, res, next) => {
+  requestCounter.add(1, { 
+    method: req.method, 
+    route: req.path 
+  });
+  next();
+});
+
 const PORT = process.env.PORT || 5000;
 
 const DB_LOCAL = process.env.DB_URL_LOCAL || "mysql://vinilcasethub:1111111@10.10.10.73:3306/vinilcasethub";
