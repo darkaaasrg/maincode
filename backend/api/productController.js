@@ -156,6 +156,44 @@ router.get("/products/random", async (req, res) => {
         res.status(500).json({ message: "Помилка сервера" });
     }
 });
+router.get("/search", (req, res) => {
+    const { q, genre, minPrice, maxPrice, country } = req.query;
+
+    const searchQuery = q ? `%${q}%` : '%';
+    const genreQuery = genre ? `%${genre}%` : '%';
+    const countryQuery = country ? `%${country}%` : '%';
+    const minP = minPrice ? parseFloat(minPrice) : 0;
+    const maxP = maxPrice ? parseFloat(maxPrice) : 9999999;
+
+    const sql = `
+        SELECT ID, Title, Artist, Genre, Published, Price, Country, Photo, 'vinyl' as type 
+        FROM vinyls 
+        WHERE (Title LIKE ? OR Artist LIKE ?) 
+          AND Genre LIKE ? 
+          AND Country LIKE ?
+          AND Price BETWEEN ? AND ?
+        UNION ALL
+        SELECT ID, Title, Artist, Genre, Published, Price, Country, Photo, 'cassette' as type 
+        FROM cassettes 
+        WHERE (Title LIKE ? OR Artist LIKE ?) 
+          AND Genre LIKE ? 
+          AND Country LIKE ?
+          AND Price BETWEEN ? AND ?
+    `;
+
+    const params = [
+        searchQuery, searchQuery, genreQuery, countryQuery, minP, maxP,
+        searchQuery, searchQuery, genreQuery, countryQuery, minP, maxP
+    ];
+
+    db.query(sql, params, (err, results) => {
+        if (err) {
+            console.error("Search error:", err);
+            return res.status(500).json({ error: "DBError", message: err.message });
+        }
+        res.json(results);
+    });
+});
 
 router.get("/vinyls", vinylHandlers.getAll);
 router.get("/vinyls/:id", vinylHandlers.getById);

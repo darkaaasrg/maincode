@@ -6,6 +6,7 @@ import logoImage from "../icon.png";
 
 function Header() {
   const [user, setUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,12 +28,30 @@ function Header() {
     navigate("/");
   };
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+      setSearchTerm("");
+    }
+  };
+
   return (
     <header className="header">
       <Link to="/" className="logo-container">
         <img src={logoImage} alt="Music Catalog Logo" className="logo-img" />
         <span className="logo-text">Music Catalog</span>
       </Link>
+      
+      <form onSubmit={handleSearchSubmit} className="search-bar">
+        <input 
+            type="text" 
+            placeholder="Пошук альбомів..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button type="submit">🔍</button>
+      </form>
       
       <nav>
         <ul>

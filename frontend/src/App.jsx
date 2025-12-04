@@ -8,6 +8,7 @@
   import Register from './registro/Register';
   import Login from './registro/LoginPage';
   import Profile from './registro/Profile';
+  import SearchPage from "./components/SearchPage";
   import './index.css'
 
   function App() {
@@ -21,9 +22,8 @@
               <Route path="/" element={<Home />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-
-            <Route path="/profile" element={<Profile />} />
-
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/search" element={<SearchPage />} />
               <Route path="/vinyls" element={<Vinyls />} />
               <Route path="/cassettes" element={<Cassettes />} />
             </Routes>

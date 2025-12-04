@@ -27,8 +27,16 @@ export default function Cassettes() {
   useEffect(() => {
     loadCassettes();
   }, []);
-  
-  
+  useEffect(() => {
+    if (location.state?.openId && cassetteList.length > 0) {
+      const targetCassette = cassetteList.find(c => c.ID === location.state.openId);
+      
+      if (targetCassette) {
+        handleOpenDetailModal(targetCassette);
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state, cassetteList]);
 
   const loadCassettes = () => {
     fetch("http://localhost:5000/api/cassettes")
