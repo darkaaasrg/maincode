@@ -1,8 +1,6 @@
 import express from "express";
 import { db } from "../index.js";
 import { authenticateToken, authorizeAdmin } from "../middleware/authMiddleware.js";
-// === 1. ІМПОРТУЄМО НАШ MIDDLEWARE ДЛЯ ФАЙЛІВ ===
-// (Ми створили його на попередньому кроці в /middleware/uploadMiddleware.js)
 import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
@@ -135,6 +133,29 @@ const updatecassette = (req, res) => {
         res.json({ message: `Cassettes оновлено` });
     });
 };
+router.get("/products/random", async (req, res) => {
+    const limit = parseInt(req.query.limit) || 8;
+    const halfLimit = Math.ceil(limit / 2);
+
+    try {
+        const [vinyls] = await db.promise().query(
+            `SELECT ID, Title, Artist, Price, Photo, 'vinyl' as type FROM vinyls ORDER BY RAND() LIMIT ?`, 
+            [halfLimit]
+        );
+
+        const [cassettes] = await db.promise().query(
+            `SELECT ID, Title, Artist, Price, Photo, 'cassette' as type FROM cassettes ORDER BY RAND() LIMIT ?`, 
+            [halfLimit]
+        );
+
+        const mixed = [...vinyls, ...cassettes].sort(() => 0.5 - Math.random());
+
+        res.json(mixed);
+    } catch (err) {
+        console.error("Помилка отримання random товарів:", err);
+        res.status(500).json({ message: "Помилка сервера" });
+    }
+});
 
 router.get("/vinyls", vinylHandlers.getAll);
 router.get("/vinyls/:id", vinylHandlers.getById);

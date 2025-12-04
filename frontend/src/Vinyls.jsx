@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./Vinyls.css";
 import ReviewsContainer from "./components/ReviewsContainer";
+import { useLocation } from "react-router-dom";
 
 export default function Vinyls() {
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [vinylList, setVinylList] = useState([]);
   
@@ -25,7 +27,17 @@ export default function Vinyls() {
   useEffect(() => {
     loadVinyls();
   }, []);
-
+  useEffect(() => {
+    if (location.state?.openId && vinylList.length > 0) {
+      const targetVinyl = vinylList.find(v => v.ID === location.state.openId);
+      
+      if (targetVinyl) {
+        handleOpenDetailModal(targetVinyl);
+        
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state, vinylList]);
   const loadVinyls = () => {
     fetch("http://localhost:5000/api/vinyls")
       .then((res) => res.json())
@@ -144,8 +156,36 @@ export default function Vinyls() {
     }
   };
 
-  const handleAddToCart = (item) => {
-    alert(`Товар "${item.Title}" додано до кошика!`);
+  const handleAddToCart = async (item) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      alert("Будь ласка, увійдіть в акаунт, щоб додавати товари в кошик.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: item.ID,
+          productType: "vinyl"
+        })
+      });
+
+      if (res.ok) {
+        alert(`Товар "${item.Title}" успішно додано до кошика!`);
+      } else {
+        const err = await res.json();
+        alert(`Помилка: ${err.message}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Не вдалося додати товар. Перевірте з'єднання.");
+    }
   };
 
   return (

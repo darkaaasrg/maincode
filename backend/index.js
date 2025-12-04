@@ -4,7 +4,7 @@ import mysql from "mysql2";
 import { createConnection } from "mysql2/promise";
 import cors from "cors";
 import { v4 as uuidv4 } from 'uuid';
-
+import cartController from "./api/cartController.js";
 import productController from "./api/productController.js";
 import reviewController from "./api/reviewController.js";
 import authController from "./api/authController.js";
@@ -99,6 +99,7 @@ app.use("/api", authController);
 app.use("/api/profile", profileController);
 app.use("/api", productController);
 app.use("/api", reviewController);
+app.use("/api/cart", cartController);
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {

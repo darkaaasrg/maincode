@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./Cassettes.css";
 import ReviewsContainer from "./components/ReviewsContainer";
+import { useLocation } from "react-router-dom";
 
 export default function Cassettes() {
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cassetteList, setCassetteList] = useState([]);
   
@@ -25,6 +27,8 @@ export default function Cassettes() {
   useEffect(() => {
     loadCassettes();
   }, []);
+  
+  
 
   const loadCassettes = () => {
     fetch("http://localhost:5000/api/cassettes")
@@ -144,8 +148,36 @@ export default function Cassettes() {
     }
   };
 
-  const handleAddToCart = (item) => {
-    alert(`Товар "${item.Title}" додано до кошика!`);
+  const handleAddToCart = async (item) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      alert("Будь ласка, увійдіть в акаунт, щоб додавати товари в кошик.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: item.ID,
+          productType: "cassette"
+        })
+      });
+
+      if (res.ok) {
+        alert(`Товар "${item.Title}" успішно додано до кошика!`);
+      } else {
+        const err = await res.json();
+        alert(`Помилка: ${err.message}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Не вдалося додати товар. Перевірте з'єднання.");
+    }
   };
 
   return (
