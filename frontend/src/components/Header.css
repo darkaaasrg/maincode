@@ -76,3 +76,26 @@
   background-color: #000;
   color: #fff;
 }
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 20px;
+    padding: 5px 15px;
+    margin: 0 20px;
+    border: 1px solid #ddd;
+}
+
+.search-bar input {
+    border: none;
+    outline: none;
+    padding: 5px;
+    width: 200px;
+}
+
+.search-bar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+}

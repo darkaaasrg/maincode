@@ -1,33 +1,47 @@
-// src/components/ProductCard.jsx
-
 import React from 'react';
 import './ProductCard.css'; 
 
+const API_BASE_URL = 'http://localhost:5000';
+
 export default function ProductCard({ item, onViewDetails }) {
   
-  const imageUrl = (item.images && item.images.length > 0) 
-                   ? item.images[0] 
-                   : 'https://via.placeholder.com/150'; // Тимчасова заглушка
-  
+  let imageUrl = 'https://via.placeholder.com/150';
+
+  if (item.images && item.images.length > 0) {
+      imageUrl = item.images[0];
+  } else if (item.Photo) {
+      imageUrl = `${API_BASE_URL}/uploads/${item.Photo}`; 
+  }
+
+  const itemType = item.type || 'unknown';
+  const title = item.Title || item.title || "Без назви";
+  const artist = item.Artist || item.artist || "Невідомий виконавець";
+  const price = item.Price || item.price;
+
   return (
-    <div className={`product-card ${item.type.toLowerCase()}`}>
+    <div 
+      className={`product-card ${itemType.toLowerCase()}`}
+      onClick={() => onViewDetails(item)} 
+      style={{ cursor: 'pointer' }} 
+    >
       <div className="product-image-container">
         <img 
-          src={imageUrl} // ВИКОРИСТОВУЄМО ВИПРАВЛЕНЕ ЗОБРАЖЕННЯ
-          alt={`${item.title} - ${item.artist}`} 
+          src={imageUrl} 
+          alt={`${title} - ${artist}`} 
           width="150px" 
+          onError={(e) => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/150"; }}
         />
       </div>
       
       <div className="product-info">
-        <h3>{item.title}</h3>
-        <p><strong>{item.type}</strong> від {item.artist}</p>
-        <p className="short-desc">{item.description.substring(0, 70)}...</p>
+        <h3>{title}</h3>
+        <p><strong>{itemType === 'vinyl' ? 'Вініл' : itemType === 'cassette' ? 'Касета' : itemType}</strong> від {artist}</p>
         
-        <button 
-          className="view-btn"
-          onClick={() => onViewDetails(item)}
-        >
+        {price && (
+            <p className="price">{Number(price).toFixed(2)} ₴</p>
+        )}
+        
+        <button className="view-btn">
           Переглянути деталі
         </button>
       </div>
