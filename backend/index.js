@@ -102,8 +102,8 @@ app.use("/api", reviewController);
 app.use("/api/cart", cartController);
 app.use("/uploads", express.static("uploads"));
 
-app.get("/", (req, res) => {
-    res.send("API працює! Маршрути підключено.");
+app.get("/test-404", (req, res) => {
+  return res.status(404).json({ error: "not_found_test" });
 });
 
 export default app;
