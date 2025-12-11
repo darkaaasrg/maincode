@@ -17,7 +17,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://host.docker.internal:4318
       OTEL_TRACES_EXPORTER: otlp
       OTEL_METRICS_EXPORTER: otlp
-      OTEL_SERVICE_NAME: demo-app
+      OTEL_SERVICE_NAME: music-catalog
       NODE_OPTIONS: "--require @opentelemetry/auto-instrumentations-node/register"
 
     extra_hosts:

@@ -1,57 +1,54 @@
-import { metrics } from '@opentelemetry/api';
 import express from "express";
 import mysql from "mysql2";
-import { createConnection } from "mysql2/promise";
+import { createConnection } from "mysql2/promise"; // Додано для перевірки підключення
 import cors from "cors";
 import { v4 as uuidv4 } from 'uuid';
-import cartController from "./api/cartController.js";
+
 import productController from "./api/productController.js";
 import reviewController from "./api/reviewController.js";
 import authController from "./api/authController.js";
 import profileController from "./api/profileController.js";
+import cartController from "./api/cartController.js"; 
 
 const app = express();
-
-const meter = metrics.getMeter('music-catalog-api');
-const requestCounter = meter.createCounter('my_custom_request_count', {
-  description: 'Counts total HTTP requests',
-});
-
-app.use((req, res, next) => {
-  requestCounter.add(1, { 
-    method: req.method, 
-    route: req.path 
-  });
-  next();
-});
-
 const PORT = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(express.json());
+app.use(cors({
+    exposedHeaders: ['Retry-After', 'X-Request-Id'],
+}));
+
 
 const DB_LOCAL = process.env.DB_URL_LOCAL || "mysql://vinilcasethub:1111111@10.10.10.73:3306/vinilcasethub";
 const DB_EXTERNAL = process.env.DB_URL_EXTERNAL || "mysql://vinilcasethub:1111111@193.109.144.160:4391/vinilcasethub";
 
 async function getWorkingDbUrl() {
+    if (process.env.NODE_ENV === 'test') {
+        return process.env.DB_URL || 'mysql://root:yourpassword@localhost:3306/test_db';
+    }
+
     console.log("Перевірка підключення до бази даних...");
 
     try {
-        console.log(` Спроба підключення (Local): ${DB_LOCAL.split('@')[1]}`);
+        console.log(`📡 Спроба (Local): ${DB_LOCAL.split('@')[1]}`);
         const conn = await createConnection({ uri: DB_LOCAL, connectTimeout: 3000 });
         await conn.end();
-        console.log(" Успішно: Використовується локальна мережа.");
+        console.log("Успішно: Використовується локальна мережа.");
         return DB_LOCAL;
     } catch (err) {
         console.warn(`Локальне підключення не вдалося: ${err.message}`);
     }
 
     try {
-        console.log(` Спроба підключення (External): ${DB_EXTERNAL.split('@')[1]}`);
+        console.log(`📡 Спроба (External): ${DB_EXTERNAL.split('@')[1]}`);
         const conn = await createConnection({ uri: DB_EXTERNAL, connectTimeout: 5000 });
         await conn.end();
-        console.log(" Успішно: Використовується зовнішня мережа.");
+        console.log("Успішно: Використовується зовнішня мережа.");
         return DB_EXTERNAL;
     } catch (err) {
         console.error(`Критична помилка: Не вдалося підключитися до жодної БД.`);
-        process.exit(1);
+        process.exit(1); 
     }
 }
 
@@ -64,12 +61,6 @@ export const db = mysql.createPool({
     queueLimit: 0,
     connectTimeout: 10000
 });
-
-app.use(cors());
-app.use(express.json());
-app.use(cors({
-    exposedHeaders: ['Retry-After', 'X-Request-Id'],
-}));
 
 const rate = new Map();
 const WINDOW_MS = 10_000, MAX_REQ = 50;
@@ -102,8 +93,12 @@ app.use("/api", reviewController);
 app.use("/api/cart", cartController);
 app.use("/uploads", express.static("uploads"));
 
+app.get("/", (req, res) => {
+    res.send(`API працює! Підключено до: ${activeDbUrl.includes('10.10.10.73') ? 'LOCAL' : 'EXTERNAL'} IP`);
+});
+
 app.get("/test-404", (req, res) => {
-  return res.status(404).json({ error: "not_found_test" });
+    return res.status(404).json({ error: "not_found_test" });
 });
 
 export default app;
@@ -111,6 +106,5 @@ export default app;
 if (process.env.NODE_ENV !== 'test') {
     app.listen(PORT, () => {
         console.log(`Сервер запущено на http://localhost:${PORT}`);
-        console.log(`База даних підключена через: ${activeDbUrl.includes('10.10.10.73') ? 'LOCAL' : 'EXTERNAL'} IP`);
     });
 }
