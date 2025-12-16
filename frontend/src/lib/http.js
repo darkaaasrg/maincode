@@ -15,14 +15,12 @@ export async function fetchWithResilience(url, opts = {}) {
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-        const res = await fetch(url, { ...init, headers, signal: controller.signal });
-        // Обробка 429 Rate Limit
+        const res = await fetch(url, { ...init, headers, signal: controller.signal })
         if (res.status === 429 && retries >= 1) {
             const retryAfter = Number(res.headers.get("Retry-After") || 1) * 1000;
             await sleep(retryAfter);
             return fetchWithResilience(url, { ...opts, retry: { ...retry, retries: retries - 1 } });
         }
-        // Обробка 5xx помилок сервера
         if (res.status >= 500 && retries >= 1) {
             const attempt = opts.__a ?? 0;
             await sleep(backoff(baseDelayMs, attempt, jitter));
@@ -30,7 +28,7 @@ export async function fetchWithResilience(url, opts = {}) {
         }
         return res;
     } catch (e) {
-        // Обробка мережевих помилок або таймауту
+
         if (retries >= 1) {
             const attempt = opts.__a ?? 0;
             await sleep(backoff(baseDelayMs, attempt, jitter));

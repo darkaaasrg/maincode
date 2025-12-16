@@ -8,7 +8,7 @@ const API_URL = "http://localhost:5000";
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [cartItems, setCartItems] = useState([]); // Стан для кошика
+  const [cartItems, setCartItems] = useState([]); 
   
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -26,7 +26,6 @@ export default function Profile() {
       return;
     }
 
-    // 1. Завантаження профілю
     fetch(`${API_URL}/api/profile`, {
       method: "GET",
       headers: { "Authorization": `Bearer ${token}` }
@@ -41,7 +40,6 @@ export default function Profile() {
     })
     .catch(() => navigate("/login"));
 
-    // 2. Завантаження кошика
     fetchCart(token);
 
   }, [navigate]);
@@ -65,8 +63,9 @@ export default function Profile() {
             method: "DELETE",
             headers: { "Authorization": `Bearer ${token}` }
         });
-        // Оновлюємо список після видалення
+       
         setCartItems(prev => prev.filter(item => item.cart_id !== cartId));
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
         alert("Помилка при видаленні товару");
     }

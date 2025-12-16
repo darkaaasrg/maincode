@@ -47,21 +47,16 @@ html, body {
   outline: none;
 }
 
-/* Картка продукту */
-/* frontend/src/index.css */
-
 .product-card {
   border: 1px solid #e0e0e0;
   padding: 20px;
   border-radius: 8px;
   background-color: #fff;
-  /* margin-bottom: 20px; <--- Можна прибрати або залишити, мій код вище це ігноруватиме */
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  display: flex;         /* Додано */
-  flex-direction: column; /* Додано */
+  display: flex;         
+  flex-direction: column; 
 }
 
-/* Картинка продукту */
 .product-card img {
   max-width: 200px;
   display: block;
@@ -69,7 +64,6 @@ html, body {
   border-radius: 6px;
 }
 
-/* Форма відгуку */
 .review-form {
   display: flex;
   flex-direction: column;
@@ -103,7 +97,6 @@ html, body {
   background-color: #0056b3;
 }
 
-/* Список відгуків */
 .reviews {
   margin-top: 20px;
 }

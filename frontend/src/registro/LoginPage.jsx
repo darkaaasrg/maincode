@@ -30,6 +30,7 @@ function LoginPage() {
             } else {
                 setError(data.message || 'Помилка входу. Перевірте email та пароль.');
             }
+        // eslint-disable-next-line no-unused-vars
         } catch (err) {
             setError('Помилка з\'єднання з сервером. Спробуйте пізніше.');
         }

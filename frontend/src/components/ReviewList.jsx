@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 
 export default function ReviewList({ reviews, onEdit, onDelete }) {
@@ -6,7 +7,7 @@ export default function ReviewList({ reviews, onEdit, onDelete }) {
     useEffect(() => {
         const userStr = localStorage.getItem('user');
         if (userStr) {
-            try { setCurrentUser(JSON.parse(userStr)); } catch (e) {}
+            try { setCurrentUser(JSON.parse(userStr)); } catch (e) { /* empty */ }
         }
     }, []);
 

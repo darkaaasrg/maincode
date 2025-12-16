@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import './auth.css'; // Використовуємо спільний файл стилів
+import './auth.css'; 
 
 function RegisterPage() {
-    // ВАША ЛОГІКА (БЕЗ ЗМІН)
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -41,7 +40,7 @@ function RegisterPage() {
         }
     };
 
-    // ОНОВЛЕНИЙ ДИЗАЙН (HTML)
+
     return (
         <div className="auth-page">
             <div className="auth-container">

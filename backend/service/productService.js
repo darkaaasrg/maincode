@@ -1,11 +1,9 @@
-// backend/service/productService.js (Оновлений код, без логіки відгуків)
 import { Product, Review } from "../domain/product.js";
 
 let products = [
-    // Додамо тестовий продукт для початку
     new Product(1, "Dark Side of the Moon", "Pink Floyd", "Prog Rock", 1973, 10, "vinyl", true),
 ]; 
-let nextId = 2; // Починаємо з 2, бо 1 вже є
+let nextId = 2; 
 
 export const productService = {
     create(data) {
@@ -37,5 +35,4 @@ export const productService = {
         products.splice(index, 1);
     },
 
-    // *** ЛОГІКУ addReview ВИДАЛЕНО! ***
 };

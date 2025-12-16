@@ -8,6 +8,7 @@ const API_URL = "http://localhost:5000/api/reviews";
 export default function ReviewsContainer({ productId, productType }) {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    // eslint-disable-next-line no-unused-vars
     const [error, setError] = useState(null);
     
     const [editingReview, setEditingReview] = useState(null);
