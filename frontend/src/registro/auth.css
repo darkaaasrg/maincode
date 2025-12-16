@@ -60,7 +60,7 @@
   border-color: #000;
 }
 
-/* Кнопка */
+
 .auth-btn {
   width: 100%;
   background-color: #000;
@@ -71,7 +71,6 @@
   font-weight: 700;
   text-transform: uppercase;
   cursor: pointer;
-  border-radius: 0; /* Квадратна кнопка */
   transition: all 0.3s;
   letter-spacing: 1px;
   margin-top: 10px;

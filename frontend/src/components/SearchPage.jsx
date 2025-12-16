@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom'; // Додано useNavigate
+import { useSearchParams, useNavigate } from 'react-router-dom'; 
 import ProductCard from './ProductCard';
 import './SearchPage.css';
 
@@ -7,7 +7,7 @@ const API_BASE_URL = 'http://localhost:5000';
 
 function SearchPage() {
     const [searchParams] = useSearchParams();
-    const navigate = useNavigate(); // Ініціалізація хука навігації
+    const navigate = useNavigate(); 
     const initialQuery = searchParams.get('q') || '';
 
     const [results, setResults] = useState([]);
@@ -32,7 +32,6 @@ function SearchPage() {
             const response = await fetch(`${API_BASE_URL}/api/search?${queryParams}`);
             const data = await response.json();
             
-            // Адаптація даних не потрібна, якщо ProductCard вже розуміє поле Photo
             setResults(data);
         } catch (error) {
             console.error("Помилка пошуку:", error);
@@ -50,12 +49,9 @@ function SearchPage() {
         setFilters(prev => ({ ...prev, [name]: value }));
     };
 
-    // === НОВА ФУНКЦІЯ ПЕРЕХОДУ ===
     const handleViewDetails = (item) => {
-        // Визначаємо шлях залежно від типу товару
         const path = item.type === 'vinyl' ? '/vinyls' : '/cassettes';
         
-        // Переходимо на сторінку каталогу і передаємо ID товару, щоб він одразу відкрився
         navigate(path, { state: { openId: item.ID } });
     };
 
@@ -128,7 +124,6 @@ function SearchPage() {
                             <ProductCard 
                                 key={`${item.type}-${item.ID}`} 
                                 item={item} 
-                                // Передаємо справжню функцію переходу замість console.log
                                 onViewDetails={handleViewDetails} 
                             />
                         ))}

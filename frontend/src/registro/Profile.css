@@ -39,20 +39,19 @@
   flex-direction: column;
 }
 
-/* --- СТИЛІ АВАТАРА --- */
 .profile-avatar-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 25px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #eee; /* Відділяємо лінією від даних */
+  border-bottom: 1px solid #eee; 
 }
 
 .avatar-wrapper {
   width: 120px;
   height: 120px;
-  border-radius: 50%; /* Круглий аватар */
+  border-radius: 50%;
   overflow: hidden;
   border: 2px solid #e1e1e1;
   background-color: #f9f9f9;

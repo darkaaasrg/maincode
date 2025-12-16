@@ -2,17 +2,17 @@ import React from 'react';
 
 export default function Footer() {
   const footerStyles = {
-    backgroundColor: '#f7f5ef', // Фон як у header
-    color: '#000',               // Чорний текст
+    backgroundColor: '#f7f5ef', 
+    color: '#000',              
     textAlign: 'center',         
-    padding: '20px 0',          // Збільшимо трохи відступ
+    padding: '20px 0',         
     marginTop: '30px',
-    fontSize: '0.9em'            // Трохи зменшимо розмір шрифту
+    fontSize: '0.9em'            
   };
 
   const linkStyles = {
-    color: '#000', // Колір посилань, щоб вони були видимі
-    textDecoration: 'none', // Прибираємо підкреслення
+    color: '#000', 
+    textDecoration: 'none', 
     marginLeft: '10px'
   };
 
