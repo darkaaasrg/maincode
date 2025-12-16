@@ -48,13 +48,17 @@ html, body {
 }
 
 /* Картка продукту */
+/* frontend/src/index.css */
+
 .product-card {
   border: 1px solid #e0e0e0;
   padding: 20px;
   border-radius: 8px;
   background-color: #fff;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; <--- Можна прибрати або залишити, мій код вище це ігноруватиме */
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;         /* Додано */
+  flex-direction: column; /* Додано */
 }
 
 /* Картинка продукту */

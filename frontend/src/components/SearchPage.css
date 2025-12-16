@@ -48,8 +48,33 @@
     flex: 1;
 }
 
+/* frontend/src/components/SearchPage.css */
+
+/* ... ваші інші стилі (sidebar тощо) залишаються без змін ... */
+
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+    /* Встановлюємо мінімальну ширину картки 260px. 
+       Якщо екран менший, вони будуть переноситись. */
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    
+    /* Відступи між картками: 30px по горизонталі та вертикалі */
+    gap: 30px;
+    
+    /* Додатковий відступ всередині контейнера, щоб тіні не обрізались */
+    padding: 10px;
+    
+    /* Вирівнювання карток по верху, щоб вони не розтягувались дивно */
+    align-items: start;
+}
+
+/* !!! ВАЖЛИВО: Цей блок примусово виправляє картки саме на сторінці пошуку */
+.products-grid .product-card {
+    width: 100% !important;   /* Розтягуємо картку на всю ширину комірки сітки */
+    margin: 0 !important;     /* Прибираємо margin-bottom з index.css, який може заважати */
+    height: 100%;             /* Робимо картки однакової висоти (візуально) */
+    box-sizing: border-box;   /* Враховуємо рамки у розмір */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
