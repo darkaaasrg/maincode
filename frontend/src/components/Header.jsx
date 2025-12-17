@@ -50,7 +50,7 @@ function Header() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button type="submit">🔍</button>
+        
       </form>
       
       <nav>
