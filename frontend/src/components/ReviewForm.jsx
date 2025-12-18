@@ -10,7 +10,6 @@ export default function ReviewForm({ onAdd, onUpdate, onCancel, editingReview, p
 
     useEffect(() => {
         const userStr = localStorage.getItem('user');
-        // eslint-disable-next-line no-unused-vars, no-empty
         if (userStr) { try { setUser(JSON.parse(userStr)); } catch (e) {} }
     }, []);
 
@@ -61,7 +60,6 @@ export default function ReviewForm({ onAdd, onUpdate, onCancel, editingReview, p
                 const errData = await response.json();
                 setError(errData.message || "Помилка збереження.");
             }
-        // eslint-disable-next-line no-unused-vars
         } catch (err) { setError("Помилка з'єднання."); }
     };
 
