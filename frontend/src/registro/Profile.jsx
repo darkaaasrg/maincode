@@ -65,7 +65,6 @@ export default function Profile() {
         });
        
         setCartItems(prev => prev.filter(item => item.cart_id !== cartId));
-    // eslint-disable-next-line no-unused-vars
     } catch (err) {
         alert("Помилка при видаленні товару");
     }
@@ -126,7 +125,6 @@ export default function Profile() {
 
   let avatarSrc = preview || (user.profile_photo_url ? (user.profile_photo_url.startsWith("http") ? user.profile_photo_url : `${API_URL}/uploads/${user.profile_photo_url}`) : DEFAULT_AVATAR);
 
-  // Підрахунок загальної суми
   const totalPrice = cartItems.reduce((sum, item) => sum + (Number(item.Price) * item.quantity), 0);
 
   return (
@@ -157,7 +155,6 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* ПРАВА КОЛОНКА: Кошик */}
         <div className="orders-section">
           <h2>Мій Кошик ({cartItems.length})</h2>
           

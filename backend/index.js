@@ -1,6 +1,6 @@
 import express from "express";
 import mysql from "mysql2";
-import { createConnection } from "mysql2/promise"; // Додано для перевірки підключення
+import { createConnection } from "mysql2/promise";
 import cors from "cors";
 import { v4 as uuidv4 } from 'uuid';
 

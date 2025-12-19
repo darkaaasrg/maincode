@@ -17,20 +17,19 @@ export const authenticateToken = (req, res, next) => {
         }
     
         req.user = user; 
-        next(); // Продовжуємо виконання запиту
+        next();
     });
 };
 
 export const authorizeAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'Admin') {
-        next(); // Дозволяємо
+        next();
     } else {
         res.status(403).json({ message: 'Доступ заборонено: Потрібні права Адміністратора.' });
     }
 };
 
 export const authorizeUser = (req, res, next) => {
-    // Ця функція викликається ПІСЛЯ authenticateToken
     if (req.user && (req.user.role === 'User' || req.user.role === 'Admin')) {
         next(); 
     } else {
@@ -57,7 +56,6 @@ export const isReviewAuthor = async (req, res, next) => {
         
         if (!review) return res.status(404).json({ message: 'Коментар не знайдено.' });
 
-        // Тут потрібна міграція, щоб review.userId був INT, а не VARCHAR
         if (review.userId === userIdFromToken) {
             next(); 
         } else {
